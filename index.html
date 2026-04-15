@@ -5,19 +5,14 @@
 <title>BHXH System</title>
 <style>
 body{margin:0;font-family:Arial;display:flex;}
-.sidebar{
- width:220px;background:#2c3e50;color:white;height:100vh;padding:20px;
-}
+.sidebar{width:220px;background:#2c3e50;color:white;height:100vh;padding:20px;}
 .sidebar h2{color:#1abc9c;}
 .sidebar button{
  width:100%;margin:8px 0;padding:10px;border:none;
  background:#34495e;color:white;cursor:pointer;
 }
 .main{flex:1;padding:20px;}
-.card{
- background:#ecf0f1;padding:20px;margin:10px;display:inline-block;
- border-radius:8px;
-}
+.card{background:#ecf0f1;padding:20px;margin:10px;display:inline-block;border-radius:8px;}
 input,button{padding:6px;margin:4px;}
 table{border-collapse:collapse;width:100%;margin-top:20px;}
 th,td{border:1px solid #ccc;padding:6px;}
@@ -30,7 +25,6 @@ th,td{border:1px solid #ccc;padding:6px;}
 <h2>BHXH</h2>
 <button onclick="show('dashboard')">Dashboard</button>
 <button onclick="show('nv')">Nhân viên</button>
-<button onclick="show('bhxh')">BHXH</button>
 <button onclick="show('cd')">Chế độ</button>
 </div>
 
@@ -62,7 +56,8 @@ th,td{border:1px solid #ccc;padding:6px;}
 
 <br>
 
-<button onclick="addNV()">Thêm NV</button>
+<button onclick="addNV()">Thêm</button>
+<button onclick="updateNV()">Cập nhật</button>
 
 <table>
 <thead>
@@ -70,22 +65,10 @@ th,td{border:1px solid #ccc;padding:6px;}
 <th>NV</th><th>Tên</th><th>CV</th>
 <th>Lương</th><th>Thưởng</th>
 <th>BHXH</th><th>Trạng thái</th>
+<th>Action</th>
 </tr>
 </thead>
 <tbody id="tableNV"></tbody>
-</table>
-</div>
-
-<!-- BHXH -->
-<div id="bhxh" style="display:none">
-<h2>Danh sách BHXH</h2>
-<table>
-<thead>
-<tr>
-<th>NV</th><th>Tiền BHXH</th><th>Trạng thái</th>
-</tr>
-</thead>
-<tbody id="tableBHXH"></tbody>
 </table>
 </div>
 
@@ -103,7 +86,7 @@ th,td{border:1px solid #ccc;padding:6px;}
 <table>
 <thead>
 <tr>
-<th>NV</th><th>Chế độ</th><th>Tiền</th>
+<th>NV</th><th>Chế độ</th><th>Tiền</th><th>Xóa</th>
 </tr>
 </thead>
 <tbody id="tableCD"></tbody>
@@ -137,7 +120,7 @@ function show(id){
 
 // ===== AUTO CV =====
 maCV.oninput = function(){
- let cv = ChucVu.find(c=>c.Ma===maCV.value);
+ let cv = ChucVu.find(c=>c.Ma===maCV.value.trim().toUpperCase());
 
  if(!cv){
   luong.value=""; thuong.value="";
@@ -156,25 +139,54 @@ maCV.oninput = function(){
 
 // ===== AUTO CD =====
 maCD.oninput = function(){
- let cd = CheDo.find(c=>c.Ma===maCD.value);
- if(cd){
-  tenCD.value=cd.Ten;
-  tienCD.value=cd.Tien;
+ let cd = CheDo.find(c=>c.Ma===maCD.value.trim().toUpperCase());
+
+ if(!cd){
+  tenCD.value="Sai CD"; tienCD.value="";
+  return;
  }
+
+ tenCD.value = cd.Ten;
+ tienCD.value = cd.Tien;
+}
+
+// ===== RESET =====
+function resetForm(){
+ maNV.value="";
+ tenNV.value="";
+ maDN.value="";
+ maCV.value="";
+ luong.value="";
+ thuong.value="";
+ bhxhTien.value="";
+ trangThai.value="";
+ nvCD.value="";
+ maCD.value="";
+ tenCD.value="";
+ tienCD.value="";
 }
 
 // ===== ADD NV =====
 function addNV(){
- let cv = ChucVu.find(c=>c.Ma===maCV.value);
+ let ma = maNV.value.trim();
+ let ten = tenNV.value.trim();
+ let maCv = maCV.value.trim().toUpperCase();
+
+ if(!ma || !ten) return alert("Thiếu dữ liệu");
+
+ if(NhanVien.some(n=>n.MaNV===ma))
+  return alert("Trùng mã");
+
+ let cv = ChucVu.find(c=>c.Ma===maCv);
  if(!cv) return alert("Sai CV");
 
  let tong = cv.Luong + cv.Thuong;
  let bhxh = Math.min(tong*0.32,46800000);
 
  NhanVien.push({
-  MaNV:maNV.value,
-  Ten:tenNV.value,
-  MaCV:maCV.value,
+  MaNV:ma,
+  Ten:ten,
+  MaCV:maCv,
   Luong:cv.Luong,
   Thuong:cv.Thuong,
   BHXH:bhxh,
@@ -182,9 +194,51 @@ function addNV(){
  });
 
  render();
+ resetForm();
 }
 
-// ===== ADD CHẾ ĐỘ =====
+// ===== EDIT =====
+function editNV(ma){
+ let nv = NhanVien.find(n=>n.MaNV===ma);
+
+ maNV.value = nv.MaNV;
+ tenNV.value = nv.Ten;
+ maCV.value = nv.MaCV;
+
+ maCV.dispatchEvent(new Event("input"));
+}
+
+// ===== UPDATE =====
+function updateNV(){
+ let nv = NhanVien.find(n=>n.MaNV===maNV.value);
+ if(!nv) return alert("Không tìm thấy");
+
+ let cv = ChucVu.find(c=>c.Ma===maCV.value);
+ if(!cv) return alert("Sai CV");
+
+ let tong = cv.Luong + cv.Thuong;
+ let bhxh = Math.min(tong*0.32,46800000);
+
+ nv.Ten = tenNV.value;
+ nv.MaCV = maCV.value;
+ nv.Luong = cv.Luong;
+ nv.Thuong = cv.Thuong;
+ nv.BHXH = bhxh;
+ nv.TrangThai = cv.TrangThai;
+
+ render();
+ resetForm();
+}
+
+// ===== DELETE NV =====
+function delNV(ma){
+ if(!confirm("Xóa?")) return;
+ NhanVien = NhanVien.filter(n=>n.MaNV!==ma);
+ Huong = Huong.filter(h=>h.NV!==ma);
+ render();
+}
+
+// ===== ADD CD =====
 function addCD(){
  let nv = NhanVien.find(n=>n.MaNV===nvCD.value);
  if(!nv) return alert("Chưa có NV");
@@ -198,6 +252,13 @@ function addCD(){
   Tien:cd.Tien
  });
 
+ render();
+ resetForm();
+}
+
+// ===== DELETE CD =====
+function delCD(ma){
+ Huong = Huong.filter(h=>h.NV!==ma);
  render();
 }
 
@@ -213,13 +274,10 @@ function render(){
 <td>${n.Thuong}</td>
 <td>${n.BHXH}</td>
 <td>${n.TrangThai}</td>
-</tr>`).join("");
-
- tableBHXH.innerHTML = NhanVien.map(n=>`
-<tr>
-<td>${n.MaNV}</td>
-<td>${n.BHXH}</td>
-<td>${n.TrangThai}</td>
+<td>
+<button onclick="editNV('${n.MaNV}')">Sửa</button>
+<button onclick="delNV('${n.MaNV}')">Xóa</button>
+</td>
 </tr>`).join("");
 
  tableCD.innerHTML = Huong.map(h=>`
@@ -227,9 +285,9 @@ function render(){
 <td>${h.NV}</td>
 <td>${h.Ten}</td>
 <td>${h.Tien}</td>
+<td><button onclick="delCD('${h.NV}')">Xóa</button></td>
 </tr>`).join("");
 
- // DASHBOARD
  tongNV.innerText = NhanVien.length;
  tongBHXH.innerText = NhanVien.reduce((s,n)=>s+Number(n.BHXH),0);
  daDong.innerText = NhanVien.filter(n=>n.TrangThai==="Đã đóng").length;

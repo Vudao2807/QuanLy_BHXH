@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Quản lý BHXH</title>
+<style>
+body { font-family: Arial; margin: 20px; }
+input, select, button { padding: 6px; margin: 5px; }
+table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+th, td { border: 1px solid #ccc; padding: 8px; }
+</style>
+</head>
+<body>
+
+<h2>QUẢN LÝ NHÂN VIÊN BHXH</h2>
+
+<!-- FORM -->
+<input id="maNV" placeholder="Mã NV">
+<input id="tenNV" placeholder="Tên NV">
+
+<select id="maCV">
+<option value="CV01">Giám đốc</option>
+<option value="CV02">Phó GD</option>
+<option value="CV03">Quản lý</option>
+<option value="CV04">Kế toán</option>
+<option value="CV05">Nhân viên</option>
+</select>
+
+<select id="maDN">
+<option value="DN01">Công ty Công nghệ Việt</option>
+<option value="DN02">Tập đoàn Xây dựng Nam</option>
+<option value="DN03">Cửa hàng Bán lẻ Minh</option>
+</select>
+
+<button onclick="addNV()">Thêm</button>
+<button onclick="updateNV()">Sửa</button>
+
+<br>
+
+<input id="search" placeholder="Tìm theo Mã NV">
+<button onclick="searchNV()">Tìm</button>
+
+<!-- TABLE -->
+<table>
+<thead>
+<tr>
+<th>Mã NV</th>
+<th>Tên</th>
+<th>Mã CV</th>
+<th>Chức vụ</th>
+<th>Doanh nghiệp</th>
+<th>Lương</th>
+<th>Chế độ</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="table"></tbody>
+</table>
+
+<script>
+
+// ===== DATABASE =====
+let ChucVu = [
+ {MaCV:"CV01", TenCV:"Giám đốc", Luong:50000000},
+ {MaCV:"CV02", TenCV:"Phó GD", Luong:35000000},
+ {MaCV:"CV03", TenCV:"Quản lý", Luong:20000000},
+ {MaCV:"CV04", TenCV:"Kế toán", Luong:15000000},
+ {MaCV:"CV05", TenCV:"Nhân viên", Luong:10000000}
+];
+
+let DoanhNghiep = [
+ {MaDN:"DN01", TenDN:"Công ty Công nghệ Việt"},
+ {MaDN:"DN02", TenDN:"Tập đoàn Xây dựng Nam"},
+ {MaDN:"DN03", TenDN:"Cửa hàng Bán lẻ Minh"}
+];
+
+let NhanVien = [
+ {MaNV:"NV01", Ten:"Nguyễn Văn An", MaCV:"CV01", MaDN:"DN01"},
+ {MaNV:"NV02", Ten:"Lê Thị Bình", MaCV:"CV04", MaDN:"DN01"}
+];
+
+let CheDo = [
+ {Ma:"CD01", Ten:"Ốm đau"},
+ {Ma:"CD02", Ten:"Thai sản"}
+];
+
+let HuongCheDo = [
+ {MaNV:"NV02", Ma:"CD02"}
+];
+
+// ===== JOIN DATA =====
+function getData(){
+ return NhanVien.map(nv=>{
+  let cv = ChucVu.find(c=>c.MaCV==nv.MaCV);
+  let dn = DoanhNghiep.find(d=>d.MaDN==nv.MaDN);
+  let cd = HuongCheDo.find(h=>h.MaNV==nv.MaNV);
+  let tenCD = cd ? CheDo.find(c=>c.Ma==cd.Ma).Ten : "Không";
+
+  return {
+   ...nv,
+   TenCV: cv.TenCV,
+   Luong: cv.Luong,
+   TenDN: dn.TenDN,
+   CheDo: tenCD
+  }
+ });
+}
+
+// ===== RENDER =====
+function render(data){
+ let html="";
+ data.forEach(nv=>{
+  html += `
+  <tr onclick="fillForm('${nv.MaNV}')">
+    <td>${nv.MaNV}</td>
+    <td>${nv.Ten}</td>
+    <td>${nv.MaCV}</td>
+    <td>${nv.TenCV}</td>
+    <td>${nv.TenDN}</td>
+    <td>${nv.Luong}</td>
+    <td>${nv.CheDo}</td>
+    <td>
+      <button onclick="deleteNV('${nv.MaNV}')">Xóa</button>
+    </td>
+  </tr>`;
+ });
+ document.getElementById("table").innerHTML = html;
+}
+
+// ===== ADD =====
+function addNV(){
+ let nv = {
+  MaNV: maNV.value,
+  Ten: tenNV.value,
+  MaCV: maCV.value,
+  MaDN: maDN.value
+ };
+ NhanVien.push(nv);
+ render(getData());
+}
+
+// ===== UPDATE =====
+function updateNV(){
+ let nv = NhanVien.find(n=>n.MaNV==maNV.value);
+ if(nv){
+  nv.Ten = tenNV.value;
+  nv.MaCV = maCV.value;
+  nv.MaDN = maDN.value;
+ }
+ render(getData());
+}
+
+// ===== DELETE =====
+function deleteNV(ma){
+ NhanVien = NhanVien.filter(n=>n.MaNV!=ma);
+ render(getData());
+}
+
+// ===== SEARCH =====
+function searchNV(){
+ let key = search.value;
+ let data = getData().filter(n=>n.MaNV.includes(key));
+ render(data);
+}
+
+// ===== FILL FORM =====
+function fillForm(ma){
+ let nv = NhanVien.find(n=>n.MaNV==ma);
+ maNV.value = nv.MaNV;
+ tenNV.value = nv.Ten;
+ maCV.value = nv.MaCV;
+ maDN.value = nv.MaDN;
+}
+
+// INIT
+render(getData());
+
+</script>
+
+</body>
+</html>

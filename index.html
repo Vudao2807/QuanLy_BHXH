@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <title>BHXH System</title>
 <style>
-body { margin:0; font-family:Arial; display:flex;}
+body{margin:0;font-family:Arial;display:flex;}
 .sidebar{
- width:220px; background:#2c3e50; color:white; height:100vh;
- padding:20px;
+ width:220px;background:#2c3e50;color:white;height:100vh;padding:20px;
 }
 .sidebar h2{color:#1abc9c;}
 .sidebar button{
- width:100%; margin:10px 0; padding:10px;
- border:none; background:#34495e; color:white; cursor:pointer;
+ width:100%;margin:8px 0;padding:10px;border:none;
+ background:#34495e;color:white;cursor:pointer;
 }
-.main{ flex:1; padding:20px;}
+.main{flex:1;padding:20px;}
 .card{
- background:#ecf0f1; padding:20px; margin:10px; display:inline-block;
+ background:#ecf0f1;padding:20px;margin:10px;display:inline-block;
+ border-radius:8px;
 }
 input,button{padding:6px;margin:4px;}
 table{border-collapse:collapse;width:100%;margin-top:20px;}
@@ -30,10 +30,10 @@ th,td{border:1px solid #ccc;padding:6px;}
 <h2>BHXH</h2>
 <button onclick="show('dashboard')">Dashboard</button>
 <button onclick="show('nv')">Nhân viên</button>
+<button onclick="show('bhxh')">BHXH</button>
 <button onclick="show('cd')">Chế độ</button>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
 <!-- DASHBOARD -->
@@ -49,7 +49,7 @@ th,td{border:1px solid #ccc;padding:6px;}
 <h2>Nhân viên</h2>
 
 <input id="maNV" placeholder="Mã NV">
-<input id="tenNV" placeholder="Tên">
+<input id="tenNV" placeholder="Tên NV">
 <input id="maDN" placeholder="Mã DN">
 <input id="maCV" placeholder="Mã CV">
 
@@ -57,12 +57,12 @@ th,td{border:1px solid #ccc;padding:6px;}
 
 <input id="luong" readonly placeholder="Lương">
 <input id="thuong" readonly placeholder="Thưởng">
-<input id="bhxh" readonly placeholder="BHXH">
+<input id="bhxhTien" readonly placeholder="BHXH">
 <input id="trangThai" readonly placeholder="Trạng thái">
 
 <br>
 
-<button onclick="addNV()">Thêm</button>
+<button onclick="addNV()">Thêm NV</button>
 
 <table>
 <thead>
@@ -76,16 +76,29 @@ th,td{border:1px solid #ccc;padding:6px;}
 </table>
 </div>
 
+<!-- BHXH -->
+<div id="bhxh" style="display:none">
+<h2>Danh sách BHXH</h2>
+<table>
+<thead>
+<tr>
+<th>NV</th><th>Tiền BHXH</th><th>Trạng thái</th>
+</tr>
+</thead>
+<tbody id="tableBHXH"></tbody>
+</table>
+</div>
+
 <!-- CHẾ ĐỘ -->
 <div id="cd" style="display:none">
 <h2>Chế độ</h2>
 
 <input id="nvCD" placeholder="Mã NV">
 <input id="maCD" placeholder="Mã CD">
-<input id="tenCD" readonly placeholder="Tên CD">
+<input id="tenCD" readonly placeholder="Tên">
 <input id="tienCD" readonly placeholder="Tiền">
 
-<button onclick="addHuong()">Thêm</button>
+<button onclick="addCD()">Thêm</button>
 
 <table>
 <thead>
@@ -116,7 +129,7 @@ let CheDo = [
 let NhanVien = [];
 let Huong = [];
 
-// ===== UI SWITCH =====
+// ===== NAV =====
 function show(id){
  document.querySelectorAll(".main > div").forEach(d=>d.style.display="none");
  document.getElementById(id).style.display="block";
@@ -128,7 +141,7 @@ maCV.oninput = function(){
 
  if(!cv){
   luong.value=""; thuong.value="";
-  bhxh.value=""; trangThai.value="Sai CV";
+  bhxhTien.value=""; trangThai.value="Sai CV";
   return;
  }
 
@@ -136,7 +149,7 @@ maCV.oninput = function(){
  thuong.value = cv.Thuong;
 
  let tong = cv.Luong + cv.Thuong;
- bhxh.value = Math.min(tong*0.32,46800000);
+ bhxhTien.value = Math.min(tong*0.32,46800000);
 
  trangThai.value = cv.TrangThai;
 }
@@ -156,7 +169,7 @@ function addNV(){
  if(!cv) return alert("Sai CV");
 
  let tong = cv.Luong + cv.Thuong;
- let bhxhVal = Math.min(tong*0.32,46800000);
+ let bhxh = Math.min(tong*0.32,46800000);
 
  NhanVien.push({
   MaNV:maNV.value,
@@ -164,15 +177,15 @@ function addNV(){
   MaCV:maCV.value,
   Luong:cv.Luong,
   Thuong:cv.Thuong,
-  BHXH:bhxhVal,
+  BHXH:bhxh,
   TrangThai:cv.TrangThai
  });
 
  render();
 }
 
-// ===== ADD CD =====
-function addHuong(){
+// ===== ADD CHẾ ĐỘ =====
+function addCD(){
  let nv = NhanVien.find(n=>n.MaNV===nvCD.value);
  if(!nv) return alert("Chưa có NV");
 
@@ -180,7 +193,7 @@ function addHuong(){
  if(!cd) return alert("Sai CD");
 
  Huong.push({
-  MaNV:nvCD.value,
+  NV:nvCD.value,
   Ten:cd.Ten,
   Tien:cd.Tien
  });
@@ -202,9 +215,16 @@ function render(){
 <td>${n.TrangThai}</td>
 </tr>`).join("");
 
+ tableBHXH.innerHTML = NhanVien.map(n=>`
+<tr>
+<td>${n.MaNV}</td>
+<td>${n.BHXH}</td>
+<td>${n.TrangThai}</td>
+</tr>`).join("");
+
  tableCD.innerHTML = Huong.map(h=>`
 <tr>
-<td>${h.MaNV}</td>
+<td>${h.NV}</td>
 <td>${h.Ten}</td>
 <td>${h.Tien}</td>
 </tr>`).join("");

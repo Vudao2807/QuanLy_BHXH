@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <title>Truy vấn BHXH</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h2>Tra cứu quá trình đóng BHXH</h2>
+    <input type="text" id="manv" placeholder="Nhập mã NV (ví dụ: NV01)">
+    <button onclick="getBHXH()">Tìm kiếm</button>
+
+    <table id="resultTable">
+        <thead>
+            <tr>
+                <th>Mã QT</th>
+                <th>Tháng/Nam</th>
+                <th>Mức Lương</th>
+                <th>Số Tiền Đóng</th>
+                <th>Trạng Thái</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        async function getBHXH() {
+            const manv = document.getElementById('manv').value;
+            const response = await fetch(`http://localhost:3000/api/quatrinh/${manv}`);
+            const data = await response.json();
+            
+            const tbody = document.querySelector('#resultTable tbody');
+            tbody.innerHTML = '';
+            
+            data.forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.MaQT}</td>
+                        <td>${item.Thang}/${item.Nam}</td>
+                        <td>${item.MucLuongDong.toLocaleString()}</td>
+                        <td>${item.SoTienDong.toLocaleString()}</td>
+                        <td>${item.TrangThaiDong}</td>
+                    </tr>`;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,49 +1,30 @@
 const express = require('express');
-const sql = require('mssql');
-const cors = require('cors');
-require('dotenv').config();
-
+const fs = require('fs');
 const app = express();
-app.use(cors());
+const PORT = 3000;
+
+app.use(express.static('public'));
 app.use(express.json());
 
-const config = {
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    server: process.env.DB_SERVER,
-    database: 'QL_BHXH',
-    options: {
-        encrypt: false, // true nếu dùng Azure
-        trustServerCertificate: true
-    }
-};
+// Hàm đọc database từ file JSON
+const getData = () => JSON.parse(fs.readFileSync('./data/database.json', 'utf8'));
 
-// API Lấy danh sách nhân viên
-app.get('/api/nhanvien', async (req, res) => {
-    try {
-        let pool = await sql.connect(config);
-        let result = await pool.request().query("SELECT * FROM NhanVien");
-        res.json(result.recordset);
-    } catch (err) {
-        res.status(500).send(err.message);
+// API: Truy vấn danh sách nhân viên
+app.get('/api/nhanvien', (req, res) => {
+    const data = getData();
+    res.json(data.nhanVien);
+});
+
+// API: Truy vấn quá trình đóng BHXH (Thay thế lệnh JOIN trong SQL)
+app.get('/api/tra-cuu/:manv', (req, res) => {
+    const data = getData();
+    const result = data.quaTrinhDong.filter(qt => qt.MaNV === req.params.manv);
+    
+    if (result.length > 0) {
+        res.json(result);
+    } else {
+        res.status(404).json({ message: "Không tìm thấy dữ liệu" });
     }
 });
 
-// API Truy vấn quá trình đóng BHXH theo Mã NV
-app.get('/api/quatrinh/:manv', async (req, res) => {
-    try {
-        let pool = await sql.connect(config);
-        let result = await pool.request()
-            .input('manv', sql.VarChar, req.params.manv)
-            .query(`
-                SELECT QT.* FROM QuaTrinhDongBHXH QT
-                JOIN SoBHXH S ON QT.MaSo = S.MaSo
-                WHERE S.MaNV = @manv
-            `);
-        res.json(result.recordset);
-    } catch (err) {
-        res.status(500).send(err.message);
-    }
-});
-
-app.listen(3000, () => console.log('Server running on port 3000'));
+app.listen(PORT, () => console.log(`Server chạy tại http://localhost:${PORT}`));

@@ -1,51 +1,63 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <title>Truy vấn BHXH</title>
+    <meta charset="UTF-8">
+    <title>Hệ thống Quản lý BHXH</title>
     <style>
-        body { font-family: Arial; margin: 20px; }
-        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
+        body { font-family: 'Segoe UI', sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 30px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
+        th { background: #f8f9fa; }
+        .status-done { color: green; font-weight: bold; }
+        .status-wait { color: red; }
     </style>
 </head>
 <body>
-    <h2>Tra cứu quá trình đóng BHXH</h2>
-    <input type="text" id="manv" placeholder="Nhập mã NV (ví dụ: NV01)">
-    <button onclick="getBHXH()">Tìm kiếm</button>
+    <h1>Tra cứu Bảo hiểm xã hội</h1>
+    <div class="search-box">
+        <input type="text" id="maNV" placeholder="Nhập mã nhân viên (VD: NV01, NV10)...">
+        <button onclick="search()">Truy vấn</button>
+    </div>
 
-    <table id="resultTable">
+    <div id="info"></div>
+    <table id="resultTable" style="display: none;">
         <thead>
             <tr>
-                <th>Mã QT</th>
-                <th>Tháng/Nam</th>
-                <th>Mức Lương</th>
-                <th>Số Tiền Đóng</th>
-                <th>Trạng Thái</th>
+                <th>Tháng/Năm</th>
+                <th>Số tiền đóng</th>
+                <th>Trạng thái</th>
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody id="resultBody"></tbody>
     </table>
 
     <script>
-        async function getBHXH() {
-            const manv = document.getElementById('manv').value;
-            const response = await fetch(`http://localhost:3000/api/quatrinh/${manv}`);
-            const data = await response.json();
-            
-            const tbody = document.querySelector('#resultTable tbody');
+        async function search() {
+            const ma = document.getElementById('maNV').value;
+            const res = await fetch(`/api/search/${ma}`);
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message);
+                return;
+            }
+
+            document.getElementById('info').innerHTML = `<h3>Nhân viên: ${data.nhanVien.TenNV} - ${data.nhanVien.ChucVu}</h3>`;
+            const tbody = document.getElementById('resultBody');
             tbody.innerHTML = '';
             
-            data.forEach(item => {
+            data.lichSu.forEach(item => {
                 tbody.innerHTML += `
                     <tr>
-                        <td>${item.MaQT}</td>
                         <td>${item.Thang}/${item.Nam}</td>
-                        <td>${item.MucLuongDong.toLocaleString()}</td>
-                        <td>${item.SoTienDong.toLocaleString()}</td>
-                        <td>${item.TrangThaiDong}</td>
+                        <td>${item.SoTien.toLocaleString()} VNĐ</td>
+                        <td class="${item.TrangThai === 'Đã đóng' ? 'status-done' : 'status-wait'}">${item.TrangThai}</td>
                     </tr>`;
             });
+            document.getElementById('resultTable').style.display = 'table';
         }
     </script>
 </body>

@@ -1,0 +1,12 @@
+{
+  "nhanVien": [
+    { "MaNV": "NV01", "TenNV": "Nguyễn Văn An", "GioiTinh": "Nam", "ChucVu": "Giám đốc" },
+    { "MaNV": "NV02", "TenNV": "Lê Thị Bình", "GioiTinh": "Nữ", "ChucVu": "Kế toán" },
+    { "MaNV": "NV10", "TenNV": "Lý Quốc Việt", "GioiTinh": "Nam", "ChucVu": "Nhân viên" }
+  ],
+  "quaTrinhDong": [
+    { "MaNV": "NV01", "Thang": 4, "Nam": 2026, "SoTien": 16000000, "TrangThai": "Đã đóng" },
+    { "MaNV": "NV02", "Thang": 4, "Nam": 2026, "SoTien": 5440000, "TrangThai": "Đã đóng" },
+    { "MaNV": "NV10", "Thang": 4, "Nam": 2026, "SoTien": 3520000, "TrangThai": "Chưa đóng" }
+  ]
+}

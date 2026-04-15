@@ -156,24 +156,41 @@ function addNV(){
 
 // ===== ADD CHẾ ĐỘ =====
 function addHuong(){
- let nv = NhanVien.find(n=>n.MaNV==nvCD.value);
- if(!nv){
-  return alert("❌ Phải tạo nhân viên trước!");
+ let maNVInput = nvCD.value.trim();
+ let maCDInput = inputMaCD.value.trim();
+
+ // ❌ kiểm tra trống
+ if(!maNVInput || !maCDInput){
+  return alert("❌ Nhập đủ Mã NV và Mã chế độ");
  }
 
- let cd = CheDo.find(c=>c.Ma==inputMaCD.value);
+ // ❌ kiểm tra NV tồn tại
+ let nv = NhanVien.find(n => n.MaNV === maNVInput);
+ if(!nv){
+  return alert("❌ Nhân viên chưa tồn tại! Phải tạo NV trước");
+ }
+
+ // ❌ kiểm tra chế độ hợp lệ
+ let cd = CheDo.find(c => c.Ma === maCDInput);
  if(!cd){
   return alert("❌ Mã chế độ không tồn tại");
  }
 
+ // ❌ kiểm tra NV đã có chế độ chưa
+ let existed = Huong.find(h => h.MaNV === maNVInput);
+ if(existed){
+  return alert("❌ Nhân viên đã có chế độ rồi!");
+ }
+
+ // ✅ thêm
  Huong.push({
-  MaNV: nvCD.value,
-  MaCD: inputMaCD.value
+  MaNV: maNVInput,
+  MaCD: maCDInput
  });
 
+ alert("✅ Thêm chế độ thành công");
  render(getData());
 }
-
 // ===== UPDATE =====
 function updateNV(){
  let nv = NhanVien.find(n=>n.MaNV==maNV.value);

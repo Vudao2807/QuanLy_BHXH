@@ -2,25 +2,21 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>BHXH System</title>
+<title>BHXH System Final</title>
 <style>
 body{margin:0;font-family:Arial;display:flex;}
 .sidebar{width:220px;background:#2c3e50;color:white;height:100vh;padding:20px;}
 .sidebar h2{color:#1abc9c;}
-.sidebar button{
- width:100%;margin:8px 0;padding:10px;border:none;
- background:#34495e;color:white;cursor:pointer;
-}
+.sidebar button{width:100%;margin:8px 0;padding:10px;border:none;background:#34495e;color:white;}
 .main{flex:1;padding:20px;}
 .card{background:#ecf0f1;padding:20px;margin:10px;display:inline-block;border-radius:8px;}
-input,button{padding:6px;margin:4px;}
+input,select,button{padding:6px;margin:4px;}
 table{border-collapse:collapse;width:100%;margin-top:20px;}
 th,td{border:1px solid #ccc;padding:6px;}
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
 <h2>BHXH</h2>
 <button onclick="show('dashboard')">Dashboard</button>
@@ -45,19 +41,27 @@ th,td{border:1px solid #ccc;padding:6px;}
 <input id="maNV" placeholder="Mã NV">
 <input id="tenNV" placeholder="Tên NV">
 <input id="maDN" placeholder="Mã DN">
-<input id="maCV" placeholder="Mã CV">
+
+<select id="maCV"></select>
+
+<select id="trangThai">
+<option value="">--Trạng thái--</option>
+<option value="Đã đóng">Đã đóng</option>
+<option value="Chưa đóng">Chưa đóng</option>
+</select>
 
 <br>
 
 <input id="luong" readonly placeholder="Lương">
 <input id="thuong" readonly placeholder="Thưởng">
-<input id="bhxhTien" readonly placeholder="BHXH">
-<input id="trangThai" readonly placeholder="Trạng thái">
+<input id="bhxh" readonly placeholder="BHXH">
 
 <br>
 
 <button onclick="addNV()">Thêm</button>
 <button onclick="updateNV()">Cập nhật</button>
+
+<input id="searchNV" placeholder="Tìm theo Mã NV" oninput="searchNhanVien()">
 
 <table>
 <thead>
@@ -77,16 +81,20 @@ th,td{border:1px solid #ccc;padding:6px;}
 <h2>Chế độ</h2>
 
 <input id="nvCD" placeholder="Mã NV">
-<input id="maCD" placeholder="Mã CD">
+
+<select id="maCD"></select>
+
 <input id="tenCD" readonly placeholder="Tên">
 <input id="tienCD" readonly placeholder="Tiền">
 
 <button onclick="addCD()">Thêm</button>
 
+<input id="searchCD" placeholder="Tìm theo Mã CD" oninput="searchCDData()">
+
 <table>
 <thead>
 <tr>
-<th>NV</th><th>Chế độ</th><th>Tiền</th><th>Xóa</th>
+<th>NV</th><th>Mã CD</th><th>Tên</th><th>Tiền</th><th>Xóa</th>
 </tr>
 </thead>
 <tbody id="tableCD"></tbody>
@@ -97,20 +105,32 @@ th,td{border:1px solid #ccc;padding:6px;}
 
 <script>
 
-// ===== DATA =====
+// ===== DATABASE =====
 let ChucVu = [
- {Ma:"CV01", Luong:50000000, Thuong:10000000, TrangThai:"Đã đóng"},
- {Ma:"CV02", Luong:35000000, Thuong:5000000, TrangThai:"Đã đóng"},
- {Ma:"CV03", Luong:20000000, Thuong:2000000, TrangThai:"Chưa đóng"}
+ {Ma:"CV01", Ten:"Giám đốc", Luong:60000000, Thuong:15000000},
+ {Ma:"CV02", Ten:"Phó giám đốc", Luong:50000000, Thuong:10000000},
+ {Ma:"CV03", Ten:"Trưởng phòng", Luong:35000000, Thuong:7000000},
+ {Ma:"CV04", Ten:"Nhân viên", Luong:20000000, Thuong:3000000}
 ];
 
 let CheDo = [
  {Ma:"CD01", Ten:"Ốm đau", Tien:2000000},
- {Ma:"CD02", Ten:"Thai sản", Tien:90000000}
+ {Ma:"CD02", Ten:"Thai sản", Tien:90000000},
+ {Ma:"CD03", Ten:"Tai nạn", Tien:15000000}
 ];
 
 let NhanVien = [];
 let Huong = [];
+
+// ===== INIT =====
+function init(){
+ maCV.innerHTML = '<option value="">--Chọn CV--</option>' +
+  ChucVu.map(c=>`<option value="${c.Ma}">${c.Ma} - ${c.Ten}</option>`);
+
+ maCD.innerHTML = '<option value="">--Chọn CD--</option>' +
+  CheDo.map(c=>`<option value="${c.Ma}">${c.Ma} - ${c.Ten}</option>`);
+}
+init();
 
 // ===== NAV =====
 function show(id){
@@ -119,126 +139,91 @@ function show(id){
 }
 
 // ===== AUTO CV =====
-maCV.oninput = function(){
- let cv = ChucVu.find(c=>c.Ma===maCV.value.trim().toUpperCase());
-
- if(!cv){
-  luong.value=""; thuong.value="";
-  bhxhTien.value=""; trangThai.value="Sai CV";
-  return;
- }
+maCV.onchange = function(){
+ let cv = ChucVu.find(c=>c.Ma===maCV.value);
+ if(!cv) return;
 
  luong.value = cv.Luong;
  thuong.value = cv.Thuong;
 
  let tong = cv.Luong + cv.Thuong;
- bhxhTien.value = Math.min(tong*0.32,46800000);
-
- trangThai.value = cv.TrangThai;
+ bhxh.value = Math.min(tong*0.32,46800000);
 }
 
 // ===== AUTO CD =====
-maCD.oninput = function(){
- let cd = CheDo.find(c=>c.Ma===maCD.value.trim().toUpperCase());
-
- if(!cd){
-  tenCD.value="Sai CD"; tienCD.value="";
-  return;
- }
+maCD.onchange = function(){
+ let cd = CheDo.find(c=>c.Ma===maCD.value);
+ if(!cd) return;
 
  tenCD.value = cd.Ten;
  tienCD.value = cd.Tien;
 }
 
 // ===== RESET =====
-function resetForm(){
- maNV.value="";
- tenNV.value="";
- maDN.value="";
- maCV.value="";
- luong.value="";
- thuong.value="";
- bhxhTien.value="";
- trangThai.value="";
- nvCD.value="";
- maCD.value="";
- tenCD.value="";
- tienCD.value="";
+function reset(){
+ maNV.value=""; tenNV.value=""; maDN.value="";
+ maCV.value=""; trangThai.value="";
+ luong.value=""; thuong.value=""; bhxh.value="";
+ nvCD.value=""; maCD.value="";
+ tenCD.value=""; tienCD.value="";
 }
 
-// ===== ADD NV =====
+// ===== CRUD NV =====
 function addNV(){
- let ma = maNV.value.trim();
- let ten = tenNV.value.trim();
- let maCv = maCV.value.trim().toUpperCase();
-
- if(!ma || !ten) return alert("Thiếu dữ liệu");
-
- if(NhanVien.some(n=>n.MaNV===ma))
-  return alert("Trùng mã");
-
- let cv = ChucVu.find(c=>c.Ma===maCv);
- if(!cv) return alert("Sai CV");
-
- let tong = cv.Luong + cv.Thuong;
- let bhxh = Math.min(tong*0.32,46800000);
-
- NhanVien.push({
-  MaNV:ma,
-  Ten:ten,
-  MaCV:maCv,
-  Luong:cv.Luong,
-  Thuong:cv.Thuong,
-  BHXH:bhxh,
-  TrangThai:cv.TrangThai
- });
-
- render();
- resetForm();
-}
-
-// ===== EDIT =====
-function editNV(ma){
- let nv = NhanVien.find(n=>n.MaNV===ma);
-
- maNV.value = nv.MaNV;
- tenNV.value = nv.Ten;
- maCV.value = nv.MaCV;
-
- maCV.dispatchEvent(new Event("input"));
-}
-
-// ===== UPDATE =====
-function updateNV(){
- let nv = NhanVien.find(n=>n.MaNV===maNV.value);
- if(!nv) return alert("Không tìm thấy");
+ if(!maNV.value || !tenNV.value) return alert("Thiếu dữ liệu");
 
  let cv = ChucVu.find(c=>c.Ma===maCV.value);
- if(!cv) return alert("Sai CV");
+ if(!cv) return alert("Chọn chức vụ");
 
  let tong = cv.Luong + cv.Thuong;
- let bhxh = Math.min(tong*0.32,46800000);
+ let bh = Math.min(tong*0.32,46800000);
 
- nv.Ten = tenNV.value;
- nv.MaCV = maCV.value;
- nv.Luong = cv.Luong;
- nv.Thuong = cv.Thuong;
- nv.BHXH = bhxh;
- nv.TrangThai = cv.TrangThai;
+ NhanVien.push({
+  MaNV:maNV.value,
+  Ten:tenNV.value,
+  MaCV:maCV.value,
+  Luong:cv.Luong,
+  Thuong:cv.Thuong,
+  BHXH:bh,
+  TrangThai:trangThai.value
+ });
 
- render();
- resetForm();
+ render(); reset();
 }
 
-// ===== DELETE NV =====
+function editNV(ma){
+ let n = NhanVien.find(x=>x.MaNV===ma);
+ maNV.value=n.MaNV; tenNV.value=n.Ten;
+ maCV.value=n.MaCV; trangThai.value=n.TrangThai;
+ maCV.onchange();
+}
+
+function updateNV(){
+ let n = NhanVien.find(x=>x.MaNV===maNV.value);
+ if(!n) return;
+
+ let cv = ChucVu.find(c=>c.Ma===maCV.value);
+ let tong = cv.Luong + cv.Thuong;
+ let bh = Math.min(tong*0.32,46800000);
+
+ n.Ten=tenNV.value;
+ n.MaCV=maCV.value;
+ n.Luong=cv.Luong;
+ n.Thuong=cv.Thuong;
+ n.BHXH=bh;
+ n.TrangThai=trangThai.value;
+
+ render(); reset();
+}
+
 function delNV(ma){
  if(!confirm("Xóa?")) return;
  NhanVien = NhanVien.filter(n=>n.MaNV!==ma);
- Huong = Huong.filter(h=>h.NV!==ma);
+ Huong = Huong.filter(h=>h.MaNV!==ma);
  render();
 }
 
-// ===== ADD CD =====
+// ===== CRUD CD =====
 function addCD(){
  let nv = NhanVien.find(n=>n.MaNV===nvCD.value);
  if(!nv) return alert("Chưa có NV");
@@ -247,25 +232,34 @@ function addCD(){
  if(!cd) return alert("Sai CD");
 
  Huong.push({
-  NV:nvCD.value,
+  MaNV:nvCD.value,
+  MaCD:cd.Ma,
   Ten:cd.Ten,
   Tien:cd.Tien
  });
 
- render();
- resetForm();
+ render(); reset();
 }
 
-// ===== DELETE CD =====
 function delCD(ma){
- Huong = Huong.filter(h=>h.NV!==ma);
+ Huong = Huong.filter(h=>h.MaNV!==ma);
  render();
+}
+
+// ===== SEARCH =====
+function searchNhanVien(){
+ let key = searchNV.value.toLowerCase();
+ render(NhanVien.filter(n=>n.MaNV.toLowerCase().includes(key)));
+}
+
+function searchCDData(){
+ let key = searchCD.value.toLowerCase();
+ renderCD(Huong.filter(h=>h.MaCD.toLowerCase().includes(key)));
 }
 
 // ===== RENDER =====
-function render(){
-
- tableNV.innerHTML = NhanVien.map(n=>`
+function render(data = NhanVien){
+ tableNV.innerHTML = data.map(n=>`
 <tr>
 <td>${n.MaNV}</td>
 <td>${n.Ten}</td>
@@ -280,17 +274,22 @@ function render(){
 </td>
 </tr>`).join("");
 
- tableCD.innerHTML = Huong.map(h=>`
-<tr>
-<td>${h.NV}</td>
-<td>${h.Ten}</td>
-<td>${h.Tien}</td>
-<td><button onclick="delCD('${h.NV}')">Xóa</button></td>
-</tr>`).join("");
+ renderCD(Huong);
 
  tongNV.innerText = NhanVien.length;
- tongBHXH.innerText = NhanVien.reduce((s,n)=>s+Number(n.BHXH),0);
+ tongBHXH.innerText = NhanVien.reduce((s,n)=>s+n.BHXH,0);
  daDong.innerText = NhanVien.filter(n=>n.TrangThai==="Đã đóng").length;
+}
+
+function renderCD(data){
+ tableCD.innerHTML = data.map(h=>`
+<tr>
+<td>${h.MaNV}</td>
+<td>${h.MaCD}</td>
+<td>${h.Ten}</td>
+<td>${h.Tien}</td>
+<td><button onclick="delCD('${h.MaNV}')">Xóa</button></td>
+</tr>`).join("");
 }
 
 </script>

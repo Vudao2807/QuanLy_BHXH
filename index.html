@@ -1,298 +1,626 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>BHXH System Final</title>
-<style>
-body{margin:0;font-family:Arial;display:flex;}
-.sidebar{width:220px;background:#2c3e50;color:white;height:100vh;padding:20px;}
-.sidebar h2{color:#1abc9c;}
-.sidebar button{width:100%;margin:8px 0;padding:10px;border:none;background:#34495e;color:white;}
-.main{flex:1;padding:20px;}
-.card{background:#ecf0f1;padding:20px;margin:10px;display:inline-block;border-radius:8px;}
-input,select,button{padding:6px;margin:4px;}
-table{border-collapse:collapse;width:100%;margin-top:20px;}
-th,td{border:1px solid #ccc;padding:6px;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Quản lý BHXH - VSS Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { 
+            --sidebar-w: 280px; /* Chiều rộng thanh menu bên trái */
+            --primary: #0056b3; /* Màu xanh chủ đạo của BHXH Việt Nam */
+            --primary-light: #e6f0ff;
+            --dark: #1a202c; /* Màu nền sidebar tối */
+            --bg-body: #f4f7fe; /* Màu nền trang web */
+        }
+        
+        body { 
+            background: var(--bg-body); 
+            display: flex; 
+            font-family: 'Inter', sans-serif; 
+            overflow: hidden; /* Cố định khung hình, chỉ scroll nội dung */
+            height: 100vh;
+        }
+        
+        /* --- Sidebar Menu (Thanh bên trái) --- */
+        .sidebar { 
+            width: var(--sidebar-w); 
+            height: 100vh; 
+            background: var(--dark); 
+            color: #a0aec0; 
+            position: fixed; 
+            overflow-y: auto; /* Cho phép scroll menu nếu quá dài */
+            z-index: 1000; 
+            transition: all 0.3s;
+        }
+        
+        /* Phần Thương hiệu/Logo */
+        .sidebar-brand { 
+            padding: 25px 25px; 
+            color: white; 
+            font-weight: 800; 
+            font-size: 1.35rem; 
+            border-bottom: 1px solid #2d3748; 
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Nhóm tiêu đề menu */
+        .nav-group { 
+            padding: 25px 20px 8px; 
+            font-size: 0.7rem; 
+            text-transform: uppercase; 
+            font-weight: 700; 
+            color: #718096; 
+            letter-spacing: 1.2px;
+        }
+        
+        /* Các mục menu */
+        .nav-item { 
+            padding: 12px 20px; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            border-radius: 12px; 
+            margin: 4px 15px; 
+            display: flex; 
+            align-items: center; 
+            color: #a0aec0;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        /* Icon trong menu cố định độ rộng */
+        .nav-item i { 
+            width: 28px; 
+            font-size: 1.1rem;
+        }
+        
+        /* Hiệu ứng khi hover hoặc mục đang được chọn */
+        .nav-item:hover, .nav-item.active { 
+            background: #2d3748; 
+            color: white; 
+        }
+        
+        /* Màu riêng cho mục đang được chọn active */
+        .nav-item.active { 
+            background: var(--primary); 
+            box-shadow: 0 4px 15px rgba(0, 86, 179, 0.3); 
+        }
+
+        /* --- Main Content Area (Khu vực nội dung chính bên phải) --- */
+        .main-content { 
+            margin-left: var(--sidebar-w); /* Đẩy nội dung sang phải để nhường chỗ cho sidebar */
+            flex: 1; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        
+        /* Thanh công cụ trên cùng (Top Bar) */
+        .top-bar { 
+            background: white; 
+            padding: 15px 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
+            z-index: 999;
+        }
+        
+        /* Tiêu đề trang hiện tại */
+        #current-title {
+            font-size: 1.5rem;
+        }
+
+        /* Thân nội dung chính */
+        .content-body { 
+            flex: 1; 
+            padding: 35px 40px; 
+            overflow-y: auto; /* Chỉ scroll khu vực này */
+        }
+        
+        /* Thẻ Card chứa bảng dữ liệu */
+        .data-card { 
+            background: white; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02); 
+            padding: 30px; 
+            border: none; 
+        }
+        
+        /* --- Styling cho Bảng dữ liệu (Table) --- */
+        .table {
+            margin-bottom: 0;
+        }
+        
+        /* Tiêu đề bảng nhỏ, viết hoa, màu xám */
+        .table th { 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            color: #718096; 
+            letter-spacing: 1px; 
+            padding: 15px 10px;
+            border-bottom: 2px solid #edf2f7;
+        }
+        
+        /* Nội dung bảng */
+        .table td { 
+            vertical-align: middle; 
+            font-size: 0.9rem; 
+            color: #2d3748; 
+            padding: 18px 10px;
+            border-bottom: 1px solid #edf2f7;
+        }
+        
+        /* Hiệu ứng hover dòng trong bảng */
+        .table-hover tbody tr:hover {
+            background-color: #f8fbff;
+        }
+        
+        /* Các nút hành động (Sửa/Xóa) nhỏ gọn */
+        .action-btn {
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            border: none;
+            transition: 0.2s;
+        }
+        
+        .action-btn-edit { background-color: #e6f0ff; color: #0056b3; }
+        .action-btn-edit:hover { background-color: #0056b3; color: white; }
+        
+        .action-btn-delete { background-color: #fff1f1; color: #d9534f; }
+        .action-btn-delete:hover { background-color: #d9534f; color: white; }
+
+        /* --- Ô tìm kiếm (Search Box) --- */
+        .search-box { 
+            width: 320px; 
+            position: relative; 
+        }
+        
+        /* Icon kính lúp */
+        .search-box i { 
+            position: absolute; 
+            left: 15px; 
+            top: 13px; 
+            color: #a0aec0; 
+        }
+        
+        /* Input tìm kiếm */
+        .search-box input { 
+            padding: 12px 15px 12px 45px; /* Chừa chỗ cho icon */
+            border-radius: 12px; 
+            border: 1px solid #e2e8f0; 
+            background-color: #f8fafc;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        
+        .search-box input:focus {
+            border-color: #0056b3;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+        }
+        
+        /* --- Nút "Thêm mới" --- */
+        .btn-add-new {
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            background-color: var(--primary);
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 86, 179, 0.2);
+            transition: 0.2s;
+        }
+        
+        .btn-add-new:hover {
+            background-color: #004494;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(0, 86, 179, 0.3);
+        }
+        
+        /* --- Styling cho Modal Popup --- */
+        .modal-content { 
+            border-radius: 24px; 
+            border: none; 
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15); 
+            padding: 20px;
+        }
+        
+        .modal-header, .modal-footer {
+            border: none;
+        }
+        
+        .modal-title {
+            font-weight: 700;
+            color: #1a202c;
+        }
+        
+        .form-label-custom {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #718096;
+            letter-spacing: 0.8px;
+            margin-bottom: 8px;
+        }
+        
+        .form-control-custom {
+            border-radius: 12px;
+            padding: 12px 15px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+        }
+        
+        .form-control-custom:focus {
+            border-color: #0056b3;
+            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.08);
+        }
+    </style>
 </head>
 <body>
 
 <div class="sidebar">
-<h2>BHXH</h2>
-<button onclick="show('dashboard')">Dashboard</button>
-<button onclick="show('nv')">Nhân viên</button>
-<button onclick="show('cd')">Chế độ</button>
+    <div class="sidebar-brand">
+        <i class="fa-solid fa-shield-heart me-3 text-info" style="font-size: 1.6rem;">
+        </i> VSS ERP Pro
+    </div>
+    
+    <div class="nav-group">Danh mục</div>
+    <div class="nav-item active" onclick="loadTab('doanh-nghiep', 'MaDN')">
+        <i class="fa-solid fa-building"></i> Doanh nghiệp
+    </div>
+    <div class="nav-item" onclick="loadTab('chuc-vu', 'MaCV')">
+        <i class="fa-solid fa-id-card-clip"></i> Chức vụ
+    </div>
+    <div class="nav-item" onclick="loadTab('che-do', 'MaCheDo')">
+        <i class="fa-solid fa-hand-holding-heart"></i> Chế độ hưởng
+    </div>
+
+    <div class="nav-group">Nhân sự</div>
+    <div class="nav-item" onclick="loadTab('nhan-vien', 'MaNV')">
+        <i class="fa-solid fa-users"></i> Nhân viên
+    </div>
+    <div class="nav-item" onclick="loadTab('hop-dong', 'MaHD')">
+        <i class="fa-solid fa-file-contract"></i> Hợp đồng lao động
+    </div>
+    <div class="nav-item" onclick="loadTab('so-bhxh', 'MaSo')">
+        <i class="fa-solid fa-book-medical"></i> Sổ BHXH
+    </div>
+
+    <div class="nav-group">Thu & Nghiệp vụ</div>
+    <div class="nav-item" onclick="loadTab('luong-nv', 'MaLuong')">
+        <i class="fa-solid fa-money-check-dollar"></i> Lương nhân viên
+    </div>
+    <div class="nav-item" onclick="loadTab('qua-trinh-dong', 'MaQT')">
+        <i class="fa-solid fa-timeline"></i> Quá trình đóng
+    </div>
+    <div class="nav-item" onclick="loadTab('hoa-don', 'MaHoaDon')">
+        <i class="fa-solid fa-file-invoice"></i> Hóa đơn đơn vị
+    </div>
+    <div class="nav-item" onclick="loadTab('huong-che-do', 'MaHuong')">
+        <i class="fa-solid fa-heart-circle-check"></i> Giải quyết chế độ
+    </div>
 </div>
 
-<div class="main">
+<div class="main-content">
+    <div class="top-bar">
+        <div>
+            <h4 id="current-title" class="fw-bold m-0 text-dark">Quản lý Doanh nghiệp</h4>
+            <div class="text-muted small">Cơ sở dữ liệu BHXH tập trung</div>
+        </div>
+        
+        <div class="d-flex align-items-center">
+            <div class="search-box me-4">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="search-input" class="form-control form-control-sm" 
+                       placeholder="Tìm kiếm nhanh..." oninput="debounceSearch(this.value)">
+            </div>
+            
+            <div class="d-flex align-items-center me-4">
+                <div class="flex-shrink-0">
+                    <img src="https://via.placeholder.com/40" class="rounded-circle border" alt="User">
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <div class="fw-bold text-dark small">Nguyễn Văn Admin</div>
+                    <div class="text-muted small" style="font-size: 0.75rem;">Cán bộ quản lý thu</div>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary btn-add-new" onclick="openAddModal()">
+                <i class="fa-solid fa-plus me-2"></i> THÊM MỚI
+            </button>
+        </div>
+    </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard">
-<h2>Dashboard</h2>
-<div class="card">Tổng NV: <span id="tongNV"></span></div>
-<div class="card">Tổng BHXH: <span id="tongBHXH"></span></div>
-<div class="card">Đã đóng: <span id="daDong"></span></div>
+    <div class="content-body">
+        <div class="card data-card">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead id="tbl-head"></thead>
+                    <tbody id="tbl-body"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="text-center text-muted mt-5 small" style="font-size: 0.8rem;">
+            Phần mềm ERP Quản lý BHXH - Phiên bản dành cho cán bộ - VSS Pro v1.0 <br>
+            Hỗ trợ kỹ thuật: Nhóm 6 - Project Database
+        </div>
+    </div>
 </div>
 
-<!-- NHÂN VIÊN -->
-<div id="nv" style="display:none">
-<h2>Nhân viên</h2>
-
-<input id="maNV" placeholder="Mã NV">
-<input id="tenNV" placeholder="Tên NV">
-<input id="maDN" placeholder="Mã DN">
-
-<select id="maCV"></select>
-
-<select id="trangThai">
-<option value="">--Trạng thái--</option>
-<option value="Đã đóng">Đã đóng</option>
-<option value="Chưa đóng">Chưa đóng</option>
-</select>
-
-<br>
-
-<input id="luong" readonly placeholder="Lương">
-<input id="thuong" readonly placeholder="Thưởng">
-<input id="bhxh" readonly placeholder="BHXH">
-
-<br>
-
-<button onclick="addNV()">Thêm</button>
-<button onclick="updateNV()">Cập nhật</button>
-
-<input id="searchNV" placeholder="Tìm theo Mã NV" oninput="searchNhanVien()">
-
-<table>
-<thead>
-<tr>
-<th>NV</th><th>Tên</th><th>CV</th>
-<th>Lương</th><th>Thưởng</th>
-<th>BHXH</th><th>Trạng thái</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody id="tableNV"></tbody>
-</table>
+<div class="modal fade" id="dataModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header pt-3 px-2">
+                <h4 class="modal-title fw-bold text-primary" id="modal-title">Cập nhật thông tin</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-2">
+                <div class="row" id="modal-fields">
+                    </div>
+            </div>
+            <div class="modal-footer pt-3 border-top-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary btn-add-new rounded-pill px-4" onclick="saveData()">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- CHẾ ĐỘ -->
-<div id="cd" style="display:none">
-<h2>Chế độ</h2>
-
-<input id="nvCD" placeholder="Mã NV">
-
-<select id="maCD"></select>
-
-<input id="tenCD" readonly placeholder="Tên">
-<input id="tienCD" readonly placeholder="Tiền">
-
-<button onclick="addCD()">Thêm</button>
-
-<input id="searchCD" placeholder="Tìm theo Mã CD" oninput="searchCDData()">
-
-<table>
-<thead>
-<tr>
-<th>NV</th><th>Mã CD</th><th>Tên</th><th>Tiền</th><th>Xóa</th>
-</tr>
-</thead>
-<tbody id="tableCD"></tbody>
-</table>
-</div>
-
-</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    // URL gốc của API backend (giả định)
+    const API_URL = 'http://localhost:3000/api';
+    
+    // Biến trạng thái để quản lý tab hiện tại và chế độ sửa
+    let activeTable = 'doanh-nghiep', activePK = 'MaDN', isEditMode = false, editId = null, searchTimer;
 
-// ===== DATABASE =====
-let ChucVu = [
- {Ma:"CV01", Ten:"Giám đốc", Luong:60000000, Thuong:15000000},
- {Ma:"CV02", Ten:"Phó giám đốc", Luong:50000000, Thuong:10000000},
- {Ma:"CV03", Ten:"Trưởng phòng", Luong:35000000, Thuong:7000000},
- {Ma:"CV04", Ten:"Nhân viên", Luong:20000000, Thuong:3000000}
-];
+    // --- CẤU HÌNH CÁC CỘT & TRƯỜNG NHẬP LIỆU ---
+    // Phản ánh chính xác cấu trúc các bảng SQL bạn cung cấp (10 thực thể chính)
+    const tableConfigs = {
+        'doanh-nghiep': { title: 'Doanh nghiệp', pk: 'MaDN', fields: ['MaDN', 'TenDN', 'DiaChi', 'SDT'] },
+        'chuc-vu': { title: 'Chức vụ', pk: 'MaCV', fields: ['MaCV', 'TenCV', 'LuongCoBan'] },
+        'che-do': { title: 'Chế độ hưởng', pk: 'MaCheDo', fields: ['MaCheDo', 'TenCheDo', 'MoTa'] },
+        'nhan-vien': { title: 'Nhân viên', pk: 'MaNV', fields: ['MaNV', 'TenNV', 'NgaySinh', 'GioiTinh', 'CCCD', 'SDT', 'MaCV', 'MaDN'] },
+        'hop-dong': { title: 'Hợp đồng LĐ', pk: 'MaHD', fields: ['MaHD', 'NgayBatDau', 'NgayKetThuc', 'MaNV'] },
+        'so-bhxh': { title: 'Sổ BHXH', pk: 'MaSo', fields: ['MaSo', 'NgayCap', 'NoiCap', 'TrangThai', 'MaNV'] },
+        'luong-nv': { title: 'Lương nhân viên', pk: 'MaLuong', fields: ['MaLuong', 'Thang', 'Nam', 'TongLuong', 'Thuong', 'MaNV'] },
+        'qua-trinh-dong': { title: 'Quá trình đóng', pk: 'MaQT', fields: ['MaQT', 'Thang', 'Nam', 'MucLuongDong', 'SoTienDong', 'TrangThaiDong', 'MaSo'] },
+        'hoa-don': { title: 'Hóa đơn đơn vị', pk: 'MaHoaDon', fields: ['MaHoaDon', 'Thang', 'Nam', 'TongTien', 'MaDN'] },
+        'huong-che-do': { title: 'Giải quyết chế độ', pk: 'MaHuong', fields: ['MaHuong', 'MaNV', 'MaCheDo', 'NgayBatDau', 'NgayKetThuc', 'SoTienHuong'] }
+    };
 
-let CheDo = [
- {Ma:"CD01", Ten:"Ốm đau", Tien:2000000},
- {Ma:"CD02", Ten:"Thai sản", Tien:90000000},
- {Ma:"CD03", Ten:"Tai nạn", Tien:15000000}
-];
+    // --- DỮ LIỆU MẪU (DÙNG ĐỂ DEMO GIAO DIỆN) ---
+    // Dữ liệu này được lấy trực tiếp từ các câu lệnh INSERT trong file SQL của bạn
+    const mockData = {
+        'doanh-nghiep': [
+            { MaDN: 'DN01', TenDN: 'Công ty Công nghệ Việt', DiaChi: 'Quận 1, TP.HCM', SDT: '0281234567' },
+            { MaDN: 'DN02', TenDN: 'Tập đoàn Xây dựng Nam', DiaChi: 'Quận Cầu Giấy, Hà Nội', SDT: '0249876543' },
+            { MaDN: 'DN03', TenDN: 'Cửa hàng Bán lẻ Minh', DiaChi: 'Quận Hải Châu, Đà Nẵng', SDT: '0236112233' }
+        ],
+        'chuc-vu': [
+            { MaCV: 'CV01', TenCV: 'Giám đốc', LuongCoBan: 50000000 },
+            { MaCV: 'CV04', TenCV: 'Kế toán', LuongCoBan: 15000000 },
+            { MaCV: 'CV05', TenCV: 'Nhân viên', LuongCoBan: 10000000 }
+        ],
+        'che-do': [
+            { MaCheDo: 'CD01', TenCheDo: 'Ốm đau', MoTa: 'Hưởng khi có xác nhận của bệnh viện' },
+            { MaCheDo: 'CD02', TenCheDo: 'Thai sản', MoTa: 'Hưởng 6 tháng nghỉ thai sản' },
+            { MaCheDo: 'CD03', TenCheDo: 'Hưu trí', MoTa: 'Hưởng sau khi đủ tuổi lao động' }
+        ],
+        'nhan-vien': [
+            { MaNV: 'NV01', TenNV: 'Nguyễn Văn An', GioiTinh: 'Nam', CCCD: '001085001234', MaCV: 'CV01', MaDN: 'DN01' },
+            { MaNV: 'NV02', TenNV: 'Lê Thị Bình', GioiTinh: 'Nữ', CCCD: '001092005678', MaCV: 'CV04', MaDN: 'DN01' },
+            { MaNV: 'NV04', TenNV: 'Phạm Minh Đức', GioiTinh: 'Nam', CCCD: '001088009988', MaCV: 'CV02', MaDN: 'DN02' }
+        ]
+        // Các bảng khác có thể thêm dữ liệu mẫu tương tự
+    };
 
-let NhanVien = [];
-let Huong = [];
+    // --- 1. HÀM CHUYỂN TAB (LOAD TAB DỮ LIỆU) ---
+    // Hàm chính để thay đổi quản lý giữa các thực thể BHXH
+    async function loadTab(endpoint, pk, query = '') {
+        activeTable = endpoint; activePK = pk;
+        
+        // Reset ô tìm kiếm nếu không phải đang tìm
+        if(!query) document.getElementById('search-input').value = '';
+        
+        // Cập nhật trạng thái menu bên trái (active class)
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        // Nếu sự kiện kích hoạt bằng cách click (có event), thêm active cho mục đó
+        if (event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+            // Cập nhật tiêu đề trang chính
+            document.getElementById('current-title').innerText = 'Quản lý ' + tableConfigs[activeTable].title;
+        }
 
-// ===== INIT =====
-function init(){
- maCV.innerHTML = '<option value="">--Chọn CV--</option>' +
-  ChucVu.map(c=>`<option value="${c.Ma}">${c.Ma} - ${c.Ten}</option>`);
+        // --- Khối xử lý dữ liệu (Kết nối Backend hoặc dùng Mock) ---
+        // Trong thực tế, bạn sẽ dùng đoạn code này:
+        /*
+        const url = query ? `${API_URL}/${endpoint}?q=${query}` : `${API_URL}/${endpoint}`; 
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            renderTable(data);
+        } catch (e) { 
+            document.getElementById('tbl-body').innerHTML = '<tr><td colspan="100" class="text-danger text-center py-4">Không thể kết nối Backend API!</td></tr>'; 
+        }
+        */
+        
+        // Đoạn code demo dùng dữ liệu mẫu (mockData):
+        const data = mockData[endpoint] || [];
+        // Nếu có tìm kiếm, lọc dữ liệu mẫu
+        const filteredData = query ? 
+            data.filter(row => Object.values(row).some(val => String(val).toLowerCase().includes(query.toLowerCase()))) : 
+            data;
+            
+        renderTable(filteredData);
+    }
 
- maCD.innerHTML = '<option value="">--Chọn CD--</option>' +
-  CheDo.map(c=>`<option value="${c.Ma}">${c.Ma} - ${c.Ten}</option>`);
-}
-init();
+    // --- 2. HÀM HIỂN THỊ BẢNG DỮ LIỆU (RENDER TABLE) ---
+    // Tự động sinh tiêu đề cột và nội dung hàng dựa trên dữ liệu và cấu hình
+    function renderTable(data) {
+        const head = document.getElementById('tbl-head'), body = document.getElementById('tbl-body');
+        
+        // Xóa nội dung cũ
+        head.innerHTML = ''; body.innerHTML = '';
+        
+        // Lấy cấu hình các trường cần hiển thị
+        const fieldsToDisplay = tableConfigs[activeTable].fields;
 
-// ===== NAV =====
-function show(id){
- document.querySelectorAll(".main > div").forEach(d=>d.style.display="none");
- document.getElementById(id).style.display="block";
-}
+        // Sinh tiêu đề bảng (Thêm cột Hành động)
+        head.innerHTML = `<tr>${fieldsToDisplay.map(f => `<th>${f}</th>`).join('')} <th class="text-end">Thao tác</th></tr>`;
+        
+        // Nếu không có dữ liệu, hiển thị thông báo
+        if (!data || data.length === 0) { 
+            body.innerHTML = `<tr><td colspan="100" class="text-center py-5 text-muted">Không có dữ liệu trong danh mục ${tableConfigs[activeTable].title}</td></tr>`; 
+            return; 
+        }
+        
+        // Sinh nội dung bảng
+        body.innerHTML = data.map(row => `
+            <tr>
+                ${fieldsToDisplay.map(f => {
+                    let val = row[f];
+                    // Định dạng màu cho cột Giới tính
+                    if (f === 'GioiTinh') {
+                        const bg = val === 'Nữ' ? 'bg-danger-subtle text-danger' : 'bg-primary-subtle text-primary';
+                        val = `<span class="badge ${bg} px-2 rounded-pill">${val}span>`;
+                    }
+                    // Định dạng tiền tệ cho các cột chứa 'Luong' hoặc 'Tien'
+                    if (String(f).includes('Luong') || String(f).includes('Tien')) {
+                        if (val) val = Number(val).toLocaleString('vi-VN') + ' đ';
+                    }
+                    return `<td>${val || ''}</td>`;
+                }).join('')}
+                <td class="text-end text-nowrap">
+                    <button class="action-btn action-btn-edit me-1" onclick="openEditModal('${row[activePK]}')">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="action-btn action-btn-delete" onclick="deleteItem('${row[activePK]}')">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </td>
+            </tr>`).join('');
+    }
 
-// ===== AUTO CV =====
-maCV.onchange = function(){
- let cv = ChucVu.find(c=>c.Ma===maCV.value);
- if(!cv) return;
+    // --- 3. XỬ LÝ TÌM KIẾM (DEBOUNCE) ---
+    // Tránh gọi API liên tục khi người dùng đang gõ, chỉ gọi sau khi dừng gõ 0.4 giây
+    function debounceSearch(val) {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => loadTab(activeTable, activePK, val), 400);
+    }
 
- luong.value = cv.Luong;
- thuong.value = cv.Thuong;
+    // --- 4. HÀM MỞ MODAL THÊM MỚI ---
+    function openAddModal() {
+        isEditMode = false; editId = null;
+        document.getElementById('modal-title').innerText = "Thêm mới " + tableConfigs[activeTable].title;
+        renderForm({}); // Render form trống
+        new bootstrap.Modal(document.getElementById('dataModal')).show();
+    }
 
- let tong = cv.Luong + cv.Thuong;
- bhxh.value = Math.min(tong*0.32,46800000);
-}
+    // --- 5. HÀM MỞ MODAL SỬA DỮ LIỆU ---
+    async function openEditModal(id) {
+        isEditMode = true; editId = id;
+        document.getElementById('modal-title').innerText = "Sửa " + tableConfigs[activeTable].title;
+        
+        // --- Khối lấy dữ liệu chi tiết bản ghi (Backend hoặc Mock) ---
+        // Trong thực tế:
+        // const res = await fetch(`${API_URL}/${activeTable}/${id}`);
+        // const item = await res.json();
+        
+        // Đoạn code demo:
+        const data = mockData[activeTable] || [];
+        const item = data.find(x => String(x[activePK]) === String(id));
+        
+        if (!item) { alert("Không tìm thấy bản ghi!"); return; }
+        
+        renderForm(item); // Render form với dữ liệu hiện có
+        new bootstrap.Modal(document.getElementById('dataModal')).show();
+    }
 
-// ===== AUTO CD =====
-maCD.onchange = function(){
- let cd = CheDo.find(c=>c.Ma===maCD.value);
- if(!cd) return;
+    // --- 6. HÀM SINH TỰ ĐỘNG FORM NHẬP LIỆU ---
+    // Dựa vào tableConfigs.fields để sinh các ô input tương ứng
+    function renderForm(item) {
+        const fields = tableConfigs[activeTable].fields;
+        const pk = tableConfigs[activeTable].pk;
+        
+        document.getElementById('modal-fields').innerHTML = fields.map(f => {
+            const isReadonly = isEditMode && f === pk ? 'readonly' : ''; // Khóa chính không được sửa khi update
+            const value = item[f] || '';
+            const type = String(f).includes('Ngay') ? 'date' : 'text'; // Chuyển type date nếu trường là 'Ngay'
 
- tenCD.value = cd.Ten;
- tienCD.value = cd.Tien;
-}
+            return `
+                <div class="col-md-6 mb-3">
+                    <label class="form-label form-label-custom">${f}</label>
+                    <input type="${type}" class="form-control form-control-custom" id="form-${f}" value="${value}" ${isReadonly}>
+                </div>`;
+        }).join('');
+    }
 
-// ===== RESET =====
-function reset(){
- maNV.value=""; tenNV.value=""; maDN.value="";
- maCV.value=""; trangThai.value="";
- luong.value=""; thuong.value=""; bhxh.value="";
- nvCD.value=""; maCD.value="";
- tenCD.value=""; tienCD.value="";
-}
+    // --- 7. HÀM LƯU DỮ LIỆU (POST/PUT) ---
+    async function saveData() {
+        const fields = tableConfigs[activeTable].fields;
+        const payload = {};
+        // Gom dữ liệu từ các ô input
+        fields.forEach(f => payload[f] = document.getElementById(`form-${f}`).value);
+        
+        console.log("Dữ liệu sẽ gửi đi:", payload);
 
-// ===== CRUD NV =====
-function addNV(){
- if(!maNV.value || !tenNV.value) return alert("Thiếu dữ liệu");
+        // --- Khối gửi dữ liệu về Backend ---
+        /*
+        const method = isEditMode ? 'PUT' : 'POST';
+        const url = isEditMode ? `${API_URL}/${activeTable}/${editId}` : `${API_URL}/${activeTable}`;
+        
+        try {
+            const res = await fetch(url, { 
+                method, 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(payload) 
+            });
+            const result = await res.json();
+            if (res.ok) {
+                bootstrap.Modal.getInstance(document.getElementById('dataModal')).hide();
+                loadTab(activeTable, activePK); // Tải lại bảng
+                alert(isEditMode ? "Cập nhật thành công!" : "Thêm mới thành công!");
+            } else { alert("Lỗi: " + result.message); }
+        } catch (err) { alert("Lỗi kết nối!"); }
+        */
+        
+        // Demo: Chỉ đóng modal và thông báo
+        bootstrap.Modal.getInstance(document.getElementById('dataModal')).hide();
+        alert("Demo: Dữ liệu đã được gom. Cần backend API để thực hiện Lưu thực sự.");
+    }
 
- let cv = ChucVu.find(c=>c.Ma===maCV.value);
- if(!cv) return alert("Chọn chức vụ");
+    // --- 8. HÀM XÓA BẢN GHI (DELETE) ---
+    async function deleteItem(id) {
+        if(confirm(`Bạn có chắc chắn muốn xóa bản ghi '${id}' khỏi danh mục ${tableConfigs[activeTable].title}?\nHành động này không thể hoàn tác.`)) {
+            
+            // --- Khối gửi lệnh xóa về Backend ---
+            /*
+            try {
+                const res = await fetch(`${API_URL}/${activeTable}/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    loadTab(activeTable, activePK); // Tải lại bảng
+                    alert("Đã xóa bản ghi thành công.");
+                } else { alert("Không thể xóa bản ghi."); }
+            } catch (err) { alert("Lỗi kết nối!"); }
+            */
+            
+            // Demo:
+            alert("Demo: Cần backend API để thực hiện lệnh XÓA thực sự.");
+        }
+    }
 
- let tong = cv.Luong + cv.Thuong;
- let bh = Math.min(tong*0.32,46800000);
-
- NhanVien.push({
-  MaNV:maNV.value,
-  Ten:tenNV.value,
-  MaCV:maCV.value,
-  Luong:cv.Luong,
-  Thuong:cv.Thuong,
-  BHXH:bh,
-  TrangThai:trangThai.value
- });
-
- render(); reset();
-}
-
-function editNV(ma){
- let n = NhanVien.find(x=>x.MaNV===ma);
- maNV.value=n.MaNV; tenNV.value=n.Ten;
- maCV.value=n.MaCV; trangThai.value=n.TrangThai;
- maCV.onchange();
-}
-
-function updateNV(){
- let n = NhanVien.find(x=>x.MaNV===maNV.value);
- if(!n) return;
-
- let cv = ChucVu.find(c=>c.Ma===maCV.value);
- let tong = cv.Luong + cv.Thuong;
- let bh = Math.min(tong*0.32,46800000);
-
- n.Ten=tenNV.value;
- n.MaCV=maCV.value;
- n.Luong=cv.Luong;
- n.Thuong=cv.Thuong;
- n.BHXH=bh;
- n.TrangThai=trangThai.value;
-
- render(); reset();
-}
-
-function delNV(ma){
- if(!confirm("Xóa?")) return;
- NhanVien = NhanVien.filter(n=>n.MaNV!==ma);
- Huong = Huong.filter(h=>h.MaNV!==ma);
- render();
-}
-
-// ===== CRUD CD =====
-function addCD(){
- let nv = NhanVien.find(n=>n.MaNV===nvCD.value);
- if(!nv) return alert("Chưa có NV");
-
- let cd = CheDo.find(c=>c.Ma===maCD.value);
- if(!cd) return alert("Sai CD");
-
- Huong.push({
-  MaNV:nvCD.value,
-  MaCD:cd.Ma,
-  Ten:cd.Ten,
-  Tien:cd.Tien
- });
-
- render(); reset();
-}
-
-function delCD(ma){
- Huong = Huong.filter(h=>h.MaNV!==ma);
- render();
-}
-
-// ===== SEARCH =====
-function searchNhanVien(){
- let key = searchNV.value.toLowerCase();
- render(NhanVien.filter(n=>n.MaNV.toLowerCase().includes(key)));
-}
-
-function searchCDData(){
- let key = searchCD.value.toLowerCase();
- renderCD(Huong.filter(h=>h.MaCD.toLowerCase().includes(key)));
-}
-
-// ===== RENDER =====
-function render(data = NhanVien){
- tableNV.innerHTML = data.map(n=>`
-<tr>
-<td>${n.MaNV}</td>
-<td>${n.Ten}</td>
-<td>${n.MaCV}</td>
-<td>${n.Luong}</td>
-<td>${n.Thuong}</td>
-<td>${n.BHXH}</td>
-<td>${n.TrangThai}</td>
-<td>
-<button onclick="editNV('${n.MaNV}')">Sửa</button>
-<button onclick="delNV('${n.MaNV}')">Xóa</button>
-</td>
-</tr>`).join("");
-
- renderCD(Huong);
-
- tongNV.innerText = NhanVien.length;
- tongBHXH.innerText = NhanVien.reduce((s,n)=>s+n.BHXH,0);
- daDong.innerText = NhanVien.filter(n=>n.TrangThai==="Đã đóng").length;
-}
-
-function renderCD(data){
- tableCD.innerHTML = data.map(h=>`
-<tr>
-<td>${h.MaNV}</td>
-<td>${h.MaCD}</td>
-<td>${h.Ten}</td>
-<td>${h.Tien}</td>
-<td><button onclick="delCD('${h.MaNV}')">Xóa</button></td>
-</tr>`).join("");
-}
-
+    // --- KHỞI TẠO KHI TẢI TRANG ---
+    // Mặc định tải tab Doanh nghiệp
+    window.onload = () => loadTab('doanh-nghiep', 'MaDN');
 </script>
-
 </body>
 </html>

@@ -8,6 +8,7 @@ body { font-family: Arial; margin: 20px; }
 input, select, button { padding: 6px; margin: 5px; }
 table { border-collapse: collapse; width: 100%; margin-top: 20px; }
 th, td { border: 1px solid #ccc; padding: 8px; }
+.error { border: 2px solid red; }
 </style>
 </head>
 <body>
@@ -88,7 +89,7 @@ let HuongCheDo = [
  {MaNV:"NV02", Ma:"CD02"}
 ];
 
-// ===== JOIN DATA =====
+// ===== JOIN =====
 function getData(){
  return NhanVien.map(nv=>{
   let cv = ChucVu.find(c=>c.MaCV==nv.MaCV);
@@ -120,52 +121,102 @@ function render(data){
     <td>${nv.Luong}</td>
     <td>${nv.CheDo}</td>
     <td>
-      <button onclick="deleteNV('${nv.MaNV}')">Xóa</button>
+      <button onclick="event.stopPropagation(); deleteNV('${nv.MaNV}')">Xóa</button>
     </td>
   </tr>`;
  });
  document.getElementById("table").innerHTML = html;
 }
 
+// ===== VALIDATE =====
+function resetError(){
+ maNV.classList.remove("error");
+ tenNV.classList.remove("error");
+}
+
+function validate(ma, ten){
+ let valid = true;
+ resetError();
+
+ if(ma === ""){
+  maNV.classList.add("error");
+  valid = false;
+ }
+ if(ten === ""){
+  tenNV.classList.add("error");
+  valid = false;
+ }
+
+ if(!valid){
+  alert("❌ Không được để trống dữ liệu!");
+ }
+
+ return valid;
+}
+
 // ===== ADD =====
 function addNV(){
- let nv = {
-  MaNV: maNV.value,
-  Ten: tenNV.value,
+ let ma = maNV.value.trim();
+ let ten = tenNV.value.trim();
+
+ if(!validate(ma, ten)) return;
+
+ if(NhanVien.some(n => n.MaNV === ma)){
+  alert("❌ Mã nhân viên đã tồn tại!");
+  return;
+ }
+
+ NhanVien.push({
+  MaNV: ma,
+  Ten: ten,
   MaCV: maCV.value,
   MaDN: maDN.value
- };
- NhanVien.push(nv);
+ });
+
  render(getData());
+ alert("✅ Thêm thành công!");
 }
 
 // ===== UPDATE =====
 function updateNV(){
- let nv = NhanVien.find(n=>n.MaNV==maNV.value);
- if(nv){
-  nv.Ten = tenNV.value;
-  nv.MaCV = maCV.value;
-  nv.MaDN = maDN.value;
+ let ma = maNV.value.trim();
+ let ten = tenNV.value.trim();
+
+ if(!validate(ma, ten)) return;
+
+ let nv = NhanVien.find(n => n.MaNV === ma);
+
+ if(!nv){
+  alert("❌ Không tìm thấy nhân viên!");
+  return;
  }
+
+ nv.Ten = ten;
+ nv.MaCV = maCV.value;
+ nv.MaDN = maDN.value;
+
  render(getData());
+ alert("✅ Cập nhật thành công!");
 }
 
 // ===== DELETE =====
 function deleteNV(ma){
- NhanVien = NhanVien.filter(n=>n.MaNV!=ma);
- render(getData());
+ if(confirm("Bạn có chắc muốn xóa?")){
+  NhanVien = NhanVien.filter(n => n.MaNV != ma);
+  render(getData());
+ }
 }
 
 // ===== SEARCH =====
 function searchNV(){
- let key = search.value;
- let data = getData().filter(n=>n.MaNV.includes(key));
+ let key = search.value.trim();
+ let data = getData().filter(n => n.MaNV.includes(key));
  render(data);
 }
 
 // ===== FILL FORM =====
 function fillForm(ma){
- let nv = NhanVien.find(n=>n.MaNV==ma);
+ let nv = NhanVien.find(n => n.MaNV == ma);
  maNV.value = nv.MaNV;
  tenNV.value = nv.Ten;
  maCV.value = nv.MaCV;

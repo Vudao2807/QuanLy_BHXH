@@ -1,30 +1,32 @@
 const express = require('express');
 const fs = require('fs');
+const path = require('path');
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-app.use(express.static('public'));
 app.use(express.json());
 
-// Hàm đọc database từ file JSON
-const getData = () => JSON.parse(fs.readFileSync('./data/database.json', 'utf8'));
-
-// API: Truy vấn danh sách nhân viên
-app.get('/api/nhanvien', (req, res) => {
-    const data = getData();
-    res.json(data.nhanVien);
+// Giao diện người dùng (phục vụ file index.html ở cùng thư mục)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// API: Truy vấn quá trình đóng BHXH (Thay thế lệnh JOIN trong SQL)
-app.get('/api/tra-cuu/:manv', (req, res) => {
-    const data = getData();
-    const result = data.quaTrinhDong.filter(qt => qt.MaNV === req.params.manv);
+// API lấy dữ liệu từ database.json
+const getDB = () => JSON.parse(fs.readFileSync('./database.json', 'utf8'));
+
+// API Tra cứu theo Mã Nhân Viên
+app.get('/api/search/:manv', (req, res) => {
+    const db = getDB();
+    const maNV = req.params.manv.toUpperCase();
     
-    if (result.length > 0) {
-        res.json(result);
-    } else {
-        res.status(404).json({ message: "Không tìm thấy dữ liệu" });
-    }
+    // Tìm nhân viên
+    const nv = db.nhanVien.find(n => n.MaNV === maNV);
+    if (!nv) return res.status(404).json({ message: "Không tìm thấy nhân viên!" });
+
+    // Lấy quá trình đóng BHXH
+    const quaTrinh = db.quaTrinhDong.filter(qt => qt.MaNV === maNV);
+    
+    res.json({ nhanVien: nv, lichSu: quaTrinh });
 });
 
-app.listen(PORT, () => console.log(`Server chạy tại http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server is running at http://localhost:${PORT}`));

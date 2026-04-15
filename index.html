@@ -2,17 +2,18 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>QL BHXH FULL</title>
+<title>QL BHXH FULL FINAL</title>
 <style>
 body { font-family: Arial; margin:20px;}
 input, button { padding:6px; margin:4px;}
 table { border-collapse: collapse; width:100%; margin-top:20px;}
 th,td { border:1px solid #ccc; padding:6px;}
+.error { border:2px solid red;}
 </style>
 </head>
 <body>
 
-<h2>QUẢN LÝ BHXH (FULL)</h2>
+<h2>QUẢN LÝ BHXH</h2>
 
 <!-- NHÂN VIÊN -->
 <h3>Nhân viên</h3>
@@ -25,49 +26,48 @@ th,td { border:1px solid #ccc; padding:6px;}
 <input id="sdt" placeholder="SĐT">
 <input id="maCV" placeholder="Mã CV">
 <input id="maDN" placeholder="Mã DN">
+
+<br>
+
+<input id="luong" placeholder="Lương" readonly>
+<input id="thuong" placeholder="Thưởng" readonly>
+<input id="bhxh" placeholder="BHXH" readonly>
+<input id="trangThai" placeholder="Trạng thái" readonly>
+
+<br>
+
 <button onclick="addNV()">Thêm NV</button>
-
-<!-- HỢP ĐỒNG -->
-<h3>Hợp đồng</h3>
-<input id="maHD" placeholder="Mã HD">
-<input id="hdNV" placeholder="Mã NV">
-<input id="ngayBD" type="date">
-<input id="ngayKT" type="date">
-<button onclick="addHD()">Thêm HD</button>
-
-<!-- SỔ BHXH -->
-<h3>Sổ BHXH</h3>
-<input id="maSo" placeholder="Mã sổ">
-<input id="soNV" placeholder="Mã NV">
-<input id="noiCap" placeholder="Nơi cấp">
-<button onclick="addSo()">Thêm sổ</button>
+<button onclick="updateNV()">Sửa NV</button>
 
 <!-- CHẾ ĐỘ -->
-<h3>Chế độ</h3>
-<input id="maCD" placeholder="Mã CD">
-<input id="tenCD" placeholder="Tên CD">
-<input id="tienCD" placeholder="Tiền">
-<button onclick="addCD()">Thêm CD</button>
-
-<!-- HƯỞNG -->
 <h3>Hưởng chế độ</h3>
-<input id="huongNV" placeholder="Mã NV">
-<input id="huongCD" placeholder="Mã CD">
-<input id="tienHuong" placeholder="Tiền hưởng">
-<button onclick="addHuong()">Thêm hưởng</button>
+<input id="nvCD" placeholder="Mã NV">
+<input id="maCD" placeholder="Mã CD">
+<input id="tenCD" placeholder="Tên CD" readonly>
+<input id="tienCD" placeholder="Tiền CD" readonly>
+<button onclick="addHuong()">Thêm chế độ</button>
 
 <!-- SEARCH -->
 <h3>Tìm kiếm</h3>
 <input id="search" placeholder="NV / DN / CD">
-<button onclick="search()">Tìm</button>
+<button onclick="searchData()">Tìm</button>
 
 <!-- TABLE -->
 <table>
 <thead>
 <tr>
-<th>NV</th><th>Tên</th><th>DN</th>
-<th>HD</th><th>Sổ</th>
-<th>Chế độ</th><th>Tiền hưởng</th>
+<th>Mã NV</th>
+<th>Tên</th>
+<th>DN</th>
+<th>CV</th>
+<th>Lương</th>
+<th>Thưởng</th>
+<th>BHXH</th>
+<th>Trạng thái</th>
+<th>Mã CD</th>
+<th>Chế độ</th>
+<th>Tiền CD</th>
+<th>Xóa</th>
 </tr>
 </thead>
 <tbody id="table"></tbody>
@@ -76,129 +76,177 @@ th,td { border:1px solid #ccc; padding:6px;}
 <script>
 
 // ===== DATABASE =====
+let ChucVu = [
+ {Ma:"CV01", Luong:50000000, Thuong:10000000, TrangThai:"Đã đóng"},
+ {Ma:"CV02", Luong:35000000, Thuong:5000000, TrangThai:"Đã đóng"},
+ {Ma:"CV03", Luong:20000000, Thuong:2000000, TrangThai:"Chưa đóng"},
+ {Ma:"CV04", Luong:15000000, Thuong:1500000, TrangThai:"Đã đóng"},
+ {Ma:"CV05", Luong:10000000, Thuong:1000000, TrangThai:"Chưa đóng"}
+];
+
+let CheDo = [
+ {Ma:"CD01", Ten:"Ốm đau", Tien:2000000},
+ {Ma:"CD02", Ten:"Thai sản", Tien:90000000}
+];
+
 let NhanVien = [];
-let HopDong = [];
-let SoBHXH = [];
-let CheDo = [];
 let Huong = [];
+
+// ===== AUTO CV =====
+maCV.oninput = function(){
+ let cv = ChucVu.find(c=>c.Ma===maCV.value.trim());
+
+ if(!cv){
+  luong.value="";
+  thuong.value="";
+  bhxh.value="";
+  trangThai.value="❌ Không tồn tại";
+  return;
+ }
+
+ luong.value = cv.Luong;
+ thuong.value = cv.Thuong;
+
+ let tong = cv.Luong + cv.Thuong;
+ bhxh.value = Math.min(tong * 0.32, 46800000);
+
+ trangThai.value = cv.TrangThai;
+}
+
+// ===== AUTO CHẾ ĐỘ =====
+maCD.oninput = function(){
+ let cd = CheDo.find(c=>c.Ma===maCD.value.trim());
+
+ if(!cd){
+  tenCD.value="❌ Không tồn tại";
+  tienCD.value="";
+  return;
+ }
+
+ tenCD.value = cd.Ten;
+ tienCD.value = cd.Tien;
+}
 
 // ===== ADD NV =====
 function addNV(){
- if(!maNV.value || !tenNV.value) return alert("Thiếu dữ liệu");
+ let ma = maNV.value.trim();
+ let ten = tenNV.value.trim();
+
+ if(!ma || !ten) return alert("❌ Thiếu dữ liệu");
+
+ if(NhanVien.some(n=>n.MaNV===ma))
+  return alert("❌ Trùng mã NV");
 
  NhanVien.push({
-  MaNV: maNV.value,
-  Ten: tenNV.value,
-  MaDN: maDN.value
+  MaNV: ma,
+  Ten: ten,
+  MaDN: maDN.value,
+  MaCV: maCV.value,
+  Luong: luong.value,
+  Thuong: thuong.value,
+  BHXH: bhxh.value,
+  TrangThai: trangThai.value
  });
 
  render();
 }
 
-// ===== ADD HD =====
-function addHD(){
- if(!NhanVien.find(n=>n.MaNV==hdNV.value))
-  return alert("NV chưa tồn tại");
+// ===== UPDATE =====
+function updateNV(){
+ let nv = NhanVien.find(n=>n.MaNV===maNV.value);
+ if(!nv) return alert("Không tìm thấy");
 
- HopDong.push({
-  MaHD: maHD.value,
-  MaNV: hdNV.value
- });
+ nv.Ten = tenNV.value;
+ nv.MaDN = maDN.value;
 
  render();
-}
-
-// ===== ADD SỔ =====
-function addSo(){
- if(!NhanVien.find(n=>n.MaNV==soNV.value))
-  return alert("NV chưa tồn tại");
-
- SoBHXH.push({
-  MaSo: maSo.value,
-  MaNV: soNV.value
- });
-
- render();
-}
-
-// ===== ADD CD =====
-function addCD(){
- CheDo.push({
-  Ma: maCD.value,
-  Ten: tenCD.value,
-  Tien: Number(tienCD.value)
- });
- alert("Thêm CD OK");
 }
 
 // ===== ADD HƯỞNG =====
 function addHuong(){
- let nv = NhanVien.find(n=>n.MaNV==huongNV.value);
- if(!nv) return alert("Chưa có NV");
+ let nv = NhanVien.find(n=>n.MaNV===nvCD.value);
+ if(!nv) return alert("❌ NV chưa tồn tại");
 
- let cd = CheDo.find(c=>c.Ma==huongCD.value);
- if(!cd) return alert("Sai mã CD");
+ let cd = CheDo.find(c=>c.Ma===maCD.value);
+ if(!cd) return alert("❌ CD sai");
+
+ if(Huong.some(h=>h.MaNV===nvCD.value))
+  return alert("❌ NV đã có CD");
 
  Huong.push({
-  MaNV: huongNV.value,
-  MaCD: huongCD.value,
-  Tien: tienHuong.value || cd.Tien
+  MaNV: nvCD.value,
+  MaCD: maCD.value
  });
 
+ render();
+}
+
+// ===== DELETE =====
+function del(ma){
+ NhanVien = NhanVien.filter(n=>n.MaNV!==ma);
+ Huong = Huong.filter(h=>h.MaNV!==ma);
  render();
 }
 
 // ===== JOIN =====
 function getData(){
  return NhanVien.map(nv=>{
-  let hd = HopDong.find(h=>h.MaNV==nv.MaNV);
-  let so = SoBHXH.find(s=>s.MaNV==nv.MaNV);
-  let h = Huong.find(x=>x.MaNV==nv.MaNV);
-  let cd = CheDo.find(c=>c.Ma==h?.MaCD);
+  let h = Huong.find(x=>x.MaNV===nv.MaNV);
+  let cd = CheDo.find(c=>c.Ma===h?.MaCD);
 
   return {
    ...nv,
-   HD: hd?.MaHD || "",
-   So: so?.MaSo || "",
-   CD: cd?.Ten || "",
-   Tien: h?.Tien || ""
+   MaCD: h?.MaCD || "",
+   TenCD: cd?.Ten || "",
+   TienCD: cd?.Tien || ""
   };
  });
 }
 
 // ===== RENDER =====
 function render(){
- table.innerHTML = getData().map(d=>`
+ table.innerHTML = getData().map(nv=>`
 <tr>
-<td>${d.MaNV}</td>
-<td>${d.Ten}</td>
-<td>${d.MaDN}</td>
-<td>${d.HD}</td>
-<td>${d.So}</td>
-<td>${d.CD}</td>
-<td>${d.Tien}</td>
+<td>${nv.MaNV}</td>
+<td>${nv.Ten}</td>
+<td>${nv.MaDN}</td>
+<td>${nv.MaCV}</td>
+<td>${nv.Luong}</td>
+<td>${nv.Thuong}</td>
+<td>${nv.BHXH}</td>
+<td>${nv.TrangThai}</td>
+<td>${nv.MaCD}</td>
+<td>${nv.TenCD}</td>
+<td>${nv.TienCD}</td>
+<td><button onclick="del('${nv.MaNV}')">Xóa</button></td>
 </tr>
 `).join("");
 }
 
 // ===== SEARCH =====
-function search(){
- let key = search.value;
- let data = getData().filter(d =>
-  d.MaNV.includes(key) ||
-  d.MaDN.includes(key) ||
-  d.CD.includes(key)
+function searchData(){
+ let key = search.value.trim();
+
+ let data = getData().filter(n =>
+  n.MaNV.includes(key) ||
+  n.MaDN.includes(key) ||
+  n.MaCD.includes(key)
  );
 
- table.innerHTML = data.map(d=>`
+ table.innerHTML = data.map(nv=>`
 <tr>
-<td>${d.MaNV}</td>
-<td>${d.Ten}</td>
-<td>${d.MaDN}</td>
-<td>${d.HD}</td>
-<td>${d.So}</td>
-<td>${d.CD}</td>
-<td>${d.Tien}</td>
+<td>${nv.MaNV}</td>
+<td>${nv.Ten}</td>
+<td>${nv.MaDN}</td>
+<td>${nv.MaCV}</td>
+<td>${nv.Luong}</td>
+<td>${nv.Thuong}</td>
+<td>${nv.BHXH}</td>
+<td>${nv.TrangThai}</td>
+<td>${nv.MaCD}</td>
+<td>${nv.TenCD}</td>
+<td>${nv.TienCD}</td>
+<td><button onclick="del('${nv.MaNV}')">Xóa</button></td>
 </tr>
 `).join("");
 }

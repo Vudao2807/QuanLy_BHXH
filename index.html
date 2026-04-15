@@ -419,6 +419,15 @@
             { MaCheDo: 'CD04', TenCheDo: 'Tử tuất', MoTa: 'Hưởng cho thân nhân' },
             { MaCheDo: 'CD05', TenCheDo: 'Tai nạn lao động, bệnh nghề nghiệp', MoTa: 'Hưởng khi bị tai nạn lao động, bệnh nghề nghiệp' }
         ],
+        'so-bhxh': [
+            { MaSo: 'SO01', NgayCap: '2010-01-01', NoiCap: 'BHXH TP.HCM', TrangThai: 'Đang hoạt động', MaNV: 'NV01' },
+            { MaSo: 'SO02', NgayCap: '2015-06-01', NoiCap: 'BHXH TP.HCM', TrangThai: 'Đang hoạt động', MaNV: 'NV02' },
+            { MaSo: 'SO10', NgayCap: '2012-03-15', NoiCap: 'BHXH TP.HCM', TrangThai: 'Đang hoạt động', MaNV: 'NV10' }
+        ],
+        'hop-dong': [
+            { MaHD: 'HD01', NgayBatDau: '2020-01-01', NgayKetThuc: '2025-01-01', MaNV: 'NV01' },
+            { MaHD: 'HD02', NgayBatDau: '2021-01-01', NgayKetThuc: '2024-01-01', MaNV: 'NV02' }
+        ],
         'nhan-vien': [
             { MaNV: 'NV01', TenNV: 'Nguyễn Văn An', GioiTinh: 'Nam', CCCD: '001085001234', MaCV: 'CV01', MaDN: 'DN01' },
             { MaNV: 'NV02', TenNV: 'Lê Thị Bình', GioiTinh: 'Nữ', CCCD: '001092005678', MaCV: 'CV04', MaDN: 'DN01' },
@@ -427,6 +436,17 @@
         'huong-che-do': [
             { MaHuong: 'HCD01', MaNV: 'NV02', MaCheDo: 'CD02', NgayBatDau: '2026-04-01', NgayKetThuc: '2026-10-01', SoTienHuong: 60000000 },
             { MaHuong: 'HCD03', MaNV: 'NV11', MaCheDo: 'CD01', NgayBatDau: '2026-05-10', NgayKetThuc: '2026-05-12', SoTienHuong: 500000 } // Mới thêm
+        ],
+        'qua-trinh-dong': [
+            { MaQT: 'QT-NV01-0426', MaNV: 'NV01', Thang: 4, Nam: 2026, MucLuongDong: 60000000, SoTienDong: 14976000, TrangThaiDong: 'Đã đóng', MaSo: 'SO01' },
+            { MaQT: 'QT-NV02-0426', MaNV: 'NV02', Thang: 4, Nam: 2026, MucLuongDong: 17000000, SoTienDong: 5440000, TrangThaiDong: 'Đã đóng', MaSo: 'SO02' }
+        ],
+        'luong-nv': [
+            { MaLuong: 'L-NV01-0426', Thang: 4, Nam: 2026, TongLuong: 60000000, Thuong: 10000000, MaNV: 'NV01' },
+            { MaLuong: 'L-NV02-0426', Thang: 4, Nam: 2026, TongLuong: 17000000, Thuong: 2000000, MaNV: 'NV02' }
+        ],
+        'hoa-don': [
+            { MaHoaDon: 'HD-DN01-0426', Thang: 4, Nam: 2026, TongTien: 23936000, MaDN: 'DN01' }
         ],
         'che-do': [
             { MaCheDo: 'CD01', TenCheDo: 'Ốm đau', MoTa: 'Hưởng khi có xác nhận của bệnh viện' },

@@ -15,31 +15,33 @@ th, td { border: 1px solid #ccc; padding: 8px; }
 
 <h2>QUẢN LÝ NHÂN VIÊN BHXH</h2>
 
-<!-- FORM -->
+<!-- FORM NHÂN VIÊN -->
 <input id="maNV" placeholder="Mã NV">
 <input id="tenNV" placeholder="Tên NV">
+<input id="thuong" type="number" placeholder="Thưởng">
 
-<select id="maCV">
-<option value="CV01">Giám đốc</option>
-<option value="CV02">Phó GD</option>
-<option value="CV03">Quản lý</option>
-<option value="CV04">Kế toán</option>
-<option value="CV05">Nhân viên</option>
-</select>
-
-<select id="maDN">
-<option value="DN01">Công ty Công nghệ Việt</option>
-<option value="DN02">Tập đoàn Xây dựng Nam</option>
-<option value="DN03">Cửa hàng Bán lẻ Minh</option>
-</select>
+<select id="maCV"></select>
+<select id="maDN"></select>
+<select id="maCD"></select>
 
 <button onclick="addNV()">Thêm</button>
 <button onclick="updateNV()">Sửa</button>
 
 <br>
 
-<input id="search" placeholder="Tìm theo Mã NV">
-<button onclick="searchNV()">Tìm</button>
+<!-- FORM CHẾ ĐỘ -->
+<h3>Thêm chế độ</h3>
+<input id="newMaCD" placeholder="Mã chế độ">
+<input id="newTenCD" placeholder="Tên chế độ">
+<button onclick="addCheDo()">Thêm chế độ</button>
+
+<br><br>
+
+<!-- SEARCH -->
+<input id="searchNV" placeholder="Tìm theo Mã NV">
+<input id="searchDN" placeholder="Tìm theo Mã DN">
+<input id="searchCD" placeholder="Tìm theo Mã CD">
+<button onclick="search()">Tìm</button>
 
 <!-- TABLE -->
 <table>
@@ -48,10 +50,13 @@ th, td { border: 1px solid #ccc; padding: 8px; }
 <th>Mã NV</th>
 <th>Tên</th>
 <th>Mã CV</th>
-<th>Chức vụ</th>
-<th>Doanh nghiệp</th>
-<th>Lương</th>
+<th>Lương cơ bản</th>
+<th>Thưởng</th>
+<th>Tổng lương</th>
+<th>Mã DN</th>
+<th>Mã CD</th>
 <th>Chế độ</th>
+<th>Tiền hưởng</th>
 <th>Action</th>
 </tr>
 </thead>
@@ -62,107 +67,91 @@ th, td { border: 1px solid #ccc; padding: 8px; }
 
 // ===== DATABASE =====
 let ChucVu = [
- {MaCV:"CV01", TenCV:"Giám đốc", Luong:50000000},
- {MaCV:"CV02", TenCV:"Phó GD", Luong:35000000},
- {MaCV:"CV03", TenCV:"Quản lý", Luong:20000000},
- {MaCV:"CV04", TenCV:"Kế toán", Luong:15000000},
- {MaCV:"CV05", TenCV:"Nhân viên", Luong:10000000}
+ {MaCV:"CV01", Ten:"Giám đốc", Luong:50000000},
+ {MaCV:"CV02", Ten:"Phó GD", Luong:35000000},
+ {MaCV:"CV03", Ten:"Quản lý", Luong:20000000},
+ {MaCV:"CV04", Ten:"Kế toán", Luong:15000000},
+ {MaCV:"CV05", Ten:"Nhân viên", Luong:10000000}
 ];
 
 let DoanhNghiep = [
- {MaDN:"DN01", TenDN:"Công ty Công nghệ Việt"},
- {MaDN:"DN02", TenDN:"Tập đoàn Xây dựng Nam"},
- {MaDN:"DN03", TenDN:"Cửa hàng Bán lẻ Minh"}
-];
-
-let NhanVien = [
- {MaNV:"NV01", Ten:"Nguyễn Văn An", MaCV:"CV01", MaDN:"DN01"},
- {MaNV:"NV02", Ten:"Lê Thị Bình", MaCV:"CV04", MaDN:"DN01"}
+ {MaDN:"DN01"}, {MaDN:"DN02"}, {MaDN:"DN03"}
 ];
 
 let CheDo = [
- {Ma:"CD01", Ten:"Ốm đau"},
- {Ma:"CD02", Ten:"Thai sản"}
+ {Ma:"CD01", Ten:"Ốm đau", Tien:2000000},
+ {Ma:"CD02", Ten:"Thai sản", Tien:90000000}
 ];
 
-let HuongCheDo = [
- {MaNV:"NV02", Ma:"CD02"}
+let NhanVien = [
+ {MaNV:"NV01", Ten:"An", MaCV:"CV01", MaDN:"DN01", Thuong:1000000, MaCD:"CD01"},
 ];
+
+// ===== LOAD SELECT =====
+function loadSelect(){
+ maCV.innerHTML = ChucVu.map(c=>`<option value="${c.MaCV}">${c.MaCV}</option>`).join("");
+ maDN.innerHTML = DoanhNghiep.map(d=>`<option>${d.MaDN}</option>`).join("");
+ maCD.innerHTML = CheDo.map(c=>`<option value="${c.Ma}">${c.Ma}</option>`).join("");
+}
+loadSelect();
 
 // ===== JOIN =====
 function getData(){
  return NhanVien.map(nv=>{
   let cv = ChucVu.find(c=>c.MaCV==nv.MaCV);
-  let dn = DoanhNghiep.find(d=>d.MaDN==nv.MaDN);
-  let cd = HuongCheDo.find(h=>h.MaNV==nv.MaNV);
-  let tenCD = cd ? CheDo.find(c=>c.Ma==cd.Ma).Ten : "Không";
+  let cd = CheDo.find(c=>c.Ma==nv.MaCD);
+
+  let tong = cv.Luong + Number(nv.Thuong || 0);
 
   return {
    ...nv,
-   TenCV: cv.TenCV,
    Luong: cv.Luong,
-   TenDN: dn.TenDN,
-   CheDo: tenCD
+   Tong: tong,
+   TenCD: cd?.Ten || "Không",
+   TienCD: cd?.Tien || 0
   }
  });
 }
 
 // ===== RENDER =====
 function render(data){
- let html="";
- data.forEach(nv=>{
-  html += `
-  <tr onclick="fillForm('${nv.MaNV}')">
-    <td>${nv.MaNV}</td>
-    <td>${nv.Ten}</td>
-    <td>${nv.MaCV}</td>
-    <td>${nv.TenCV}</td>
-    <td>${nv.TenDN}</td>
-    <td>${nv.Luong}</td>
-    <td>${nv.CheDo}</td>
-    <td>
-      <button onclick="event.stopPropagation(); deleteNV('${nv.MaNV}')">Xóa</button>
-    </td>
-  </tr>`;
- });
- document.getElementById("table").innerHTML = html;
+ table.innerHTML = data.map(nv=>`
+<tr onclick="fill('${nv.MaNV}')">
+<td>${nv.MaNV}</td>
+<td>${nv.Ten}</td>
+<td>${nv.MaCV}</td>
+<td>${nv.Luong}</td>
+<td>${nv.Thuong}</td>
+<td>${nv.Tong}</td>
+<td>${nv.MaDN}</td>
+<td>${nv.MaCD || ""}</td>
+<td>${nv.TenCD}</td>
+<td>${nv.TienCD}</td>
+<td>
+<button onclick="event.stopPropagation(); del('${nv.MaNV}')">Xóa</button>
+</td>
+</tr>
+`).join("");
 }
 
 // ===== VALIDATE =====
-function resetError(){
- maNV.classList.remove("error");
- tenNV.classList.remove("error");
-}
-
 function validate(ma, ten){
- let valid = true;
- resetError();
-
- if(ma === ""){
-  maNV.classList.add("error");
-  valid = false;
+ if(!ma || !ten){
+  alert("❌ Không được để trống!");
+  return false;
  }
- if(ten === ""){
-  tenNV.classList.add("error");
-  valid = false;
- }
-
- if(!valid){
-  alert("❌ Không được để trống dữ liệu!");
- }
-
- return valid;
+ return true;
 }
 
-// ===== ADD =====
+// ===== ADD NV =====
 function addNV(){
  let ma = maNV.value.trim();
  let ten = tenNV.value.trim();
 
  if(!validate(ma, ten)) return;
 
- if(NhanVien.some(n => n.MaNV === ma)){
-  alert("❌ Mã nhân viên đã tồn tại!");
+ if(NhanVien.some(n=>n.MaNV==ma)){
+  alert("❌ Trùng mã!");
   return;
  }
 
@@ -170,57 +159,79 @@ function addNV(){
   MaNV: ma,
   Ten: ten,
   MaCV: maCV.value,
-  MaDN: maDN.value
+  MaDN: maDN.value,
+  Thuong: thuong.value || 0,
+  MaCD: maCD.value
  });
 
  render(getData());
- alert("✅ Thêm thành công!");
 }
 
 // ===== UPDATE =====
 function updateNV(){
- let ma = maNV.value.trim();
- let ten = tenNV.value.trim();
+ let nv = NhanVien.find(n=>n.MaNV==maNV.value);
+ if(!nv) return alert("Không tìm thấy");
 
- if(!validate(ma, ten)) return;
-
- let nv = NhanVien.find(n => n.MaNV === ma);
-
- if(!nv){
-  alert("❌ Không tìm thấy nhân viên!");
-  return;
- }
-
- nv.Ten = ten;
+ nv.Ten = tenNV.value;
  nv.MaCV = maCV.value;
  nv.MaDN = maDN.value;
+ nv.Thuong = thuong.value;
+ nv.MaCD = maCD.value;
 
  render(getData());
- alert("✅ Cập nhật thành công!");
 }
 
 // ===== DELETE =====
-function deleteNV(ma){
- if(confirm("Bạn có chắc muốn xóa?")){
-  NhanVien = NhanVien.filter(n => n.MaNV != ma);
-  render(getData());
- }
+function del(ma){
+ NhanVien = NhanVien.filter(n=>n.MaNV!=ma);
+ render(getData());
 }
 
 // ===== SEARCH =====
-function searchNV(){
- let key = search.value.trim();
- let data = getData().filter(n => n.MaNV.includes(key));
+function search(){
+ let data = getData();
+
+ if(searchNV.value)
+  data = data.filter(n=>n.MaNV.includes(searchNV.value));
+
+ if(searchDN.value)
+  data = data.filter(n=>n.MaDN.includes(searchDN.value));
+
+ if(searchCD.value)
+  data = data.filter(n=>n.MaCD?.includes(searchCD.value));
+
  render(data);
 }
 
-// ===== FILL FORM =====
-function fillForm(ma){
- let nv = NhanVien.find(n => n.MaNV == ma);
+// ===== ADD CHẾ ĐỘ =====
+function addCheDo(){
+ let ma = newMaCD.value.trim();
+ let ten = newTenCD.value.trim();
+
+ if(!ma || !ten){
+  alert("❌ Nhập đủ mã và tên chế độ");
+  return;
+ }
+
+ CheDo.push({
+  Ma: ma,
+  Ten: ten,
+  Tien: 1000000
+ });
+
+ loadSelect();
+ alert("✅ Đã thêm chế độ");
+}
+
+// ===== FILL =====
+function fill(ma){
+ let nv = NhanVien.find(n=>n.MaNV==ma);
  maNV.value = nv.MaNV;
  tenNV.value = nv.Ten;
  maCV.value = nv.MaCV;
  maDN.value = nv.MaDN;
+ thuong.value = nv.Thuong;
+ maCD.value = nv.MaCD;
 }
 
 // INIT

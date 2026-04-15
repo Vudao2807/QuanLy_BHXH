@@ -2,13 +2,12 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>QL BHXH FULL FINAL</title>
+<title>QL BHXH</title>
 <style>
 body { font-family: Arial; margin:20px;}
 input, button { padding:6px; margin:4px;}
 table { border-collapse: collapse; width:100%; margin-top:20px;}
 th,td { border:1px solid #ccc; padding:6px;}
-.error { border:2px solid red;}
 </style>
 </head>
 <body>
@@ -19,13 +18,8 @@ th,td { border:1px solid #ccc; padding:6px;}
 <h3>Nhân viên</h3>
 <input id="maNV" placeholder="Mã NV">
 <input id="tenNV" placeholder="Tên NV">
-<input id="ngaySinh" type="date">
-<input id="gioiTinh" placeholder="Giới tính">
-<input id="cccd" placeholder="CCCD">
-<input id="diaChi" placeholder="Địa chỉ">
-<input id="sdt" placeholder="SĐT">
-<input id="maCV" placeholder="Mã CV">
 <input id="maDN" placeholder="Mã DN">
+<input id="maCV" placeholder="Mã CV (CV01)">
 
 <br>
 
@@ -66,7 +60,7 @@ th,td { border:1px solid #ccc; padding:6px;}
 <th>Trạng thái</th>
 <th>Mã CD</th>
 <th>Chế độ</th>
-<th>Tiền CD</th>
+<th>Tiền</th>
 <th>Xóa</th>
 </tr>
 </thead>
@@ -92,15 +86,16 @@ let CheDo = [
 let NhanVien = [];
 let Huong = [];
 
-// ===== AUTO CV =====
-maCV.oninput = function(){
- let cv = ChucVu.find(c=>c.Ma===maCV.value.trim());
+// ===== AUTO CHỨC VỤ =====
+maCV.addEventListener("input", function(){
+ let ma = maCV.value.trim().toUpperCase();
+ let cv = ChucVu.find(c => c.Ma === ma);
 
  if(!cv){
   luong.value="";
   thuong.value="";
   bhxh.value="";
-  trangThai.value="❌ Không tồn tại";
+  trangThai.value="❌ Mã CV sai";
   return;
  }
 
@@ -111,11 +106,11 @@ maCV.oninput = function(){
  bhxh.value = Math.min(tong * 0.32, 46800000);
 
  trangThai.value = cv.TrangThai;
-}
+});
 
 // ===== AUTO CHẾ ĐỘ =====
-maCD.oninput = function(){
- let cd = CheDo.find(c=>c.Ma===maCD.value.trim());
+maCD.addEventListener("input", function(){
+ let cd = CheDo.find(c => c.Ma === maCD.value.trim());
 
  if(!cd){
   tenCD.value="❌ Không tồn tại";
@@ -125,27 +120,39 @@ maCD.oninput = function(){
 
  tenCD.value = cd.Ten;
  tienCD.value = cd.Tien;
-}
+});
 
 // ===== ADD NV =====
 function addNV(){
  let ma = maNV.value.trim();
  let ten = tenNV.value.trim();
+ let maCvInput = maCV.value.trim().toUpperCase();
 
- if(!ma || !ten) return alert("❌ Thiếu dữ liệu");
+ if(!ma || !ten){
+  return alert("❌ Thiếu dữ liệu");
+ }
 
- if(NhanVien.some(n=>n.MaNV===ma))
+ if(NhanVien.some(n=>n.MaNV===ma)){
   return alert("❌ Trùng mã NV");
+ }
+
+ let cv = ChucVu.find(c=>c.Ma===maCvInput);
+ if(!cv){
+  return alert("❌ Mã CV không tồn tại");
+ }
+
+ let tong = cv.Luong + cv.Thuong;
+ let bhxhValue = Math.min(tong * 0.32, 46800000);
 
  NhanVien.push({
   MaNV: ma,
   Ten: ten,
   MaDN: maDN.value,
-  MaCV: maCV.value,
-  Luong: luong.value,
-  Thuong: thuong.value,
-  BHXH: bhxh.value,
-  TrangThai: trangThai.value
+  MaCV: maCvInput,
+  Luong: cv.Luong,
+  Thuong: cv.Thuong,
+  BHXH: bhxhValue,
+  TrangThai: cv.TrangThai
  });
 
  render();
@@ -153,7 +160,7 @@ function addNV(){
 
 // ===== UPDATE =====
 function updateNV(){
- let nv = NhanVien.find(n=>n.MaNV===maNV.value);
+ let nv = NhanVien.find(n=>n.MaNV===maNV.value.trim());
  if(!nv) return alert("Không tìm thấy");
 
  nv.Ten = tenNV.value;
@@ -162,7 +169,7 @@ function updateNV(){
  render();
 }
 
-// ===== ADD HƯỞNG =====
+// ===== ADD CHẾ ĐỘ =====
 function addHuong(){
  let nv = NhanVien.find(n=>n.MaNV===nvCD.value);
  if(!nv) return alert("❌ NV chưa tồn tại");
@@ -173,10 +180,7 @@ function addHuong(){
  if(Huong.some(h=>h.MaNV===nvCD.value))
   return alert("❌ NV đã có CD");
 
- Huong.push({
-  MaNV: nvCD.value,
-  MaCD: maCD.value
- });
+ Huong.push({ MaNV: nvCD.value, MaCD: maCD.value });
 
  render();
 }

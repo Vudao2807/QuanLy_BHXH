@@ -399,40 +399,58 @@
 
     // --- DỮ LIỆU MẪU (DÙNG ĐỂ DEMO GIAO DIỆN) ---
     // Dữ liệu này được lấy trực tiếp từ các câu lệnh INSERT trong file SQL của bạn
-   const mockData = {
+  const mockData = {
         'doanh-nghiep': [
             { MaDN: 'DN01', TenDN: 'Công ty Công nghệ Việt', DiaChi: 'Quận 1, TP.HCM', SDT: '0281234567' },
             { MaDN: 'DN02', TenDN: 'Tập đoàn Xây dựng Nam', DiaChi: 'Quận Cầu Giấy, Hà Nội', SDT: '0249876543' },
-            { MaDN: 'DN03', TenDN: 'Cửa hàng Bán lẻ Minh', DiaChi: 'Quận Hải Châu, Đà Nẵng', SDT: '0236112233' },
-            { MaDN: 'DN04', TenDN: 'Tổng Công ty Xây dựng số 4', DiaChi: 'Hà Đông, Hà Nội', SDT: '02433556677' } // Mới thêm
+            { MaDN: 'DN03', TenDN: 'Cửa hàng Bán lẻ Minh', DiaChi: 'Quận Hải Châu, Đà Nẵng', SDT: '0236112233' }
         ],
         'chuc-vu': [
             { MaCV: 'CV01', TenCV: 'Giám đốc', LuongCoBan: 50000000 },
+            { MaCV: 'CV02', TenCV: 'Phó Giám đốc', LuongCoBan: 35000000 },
+            { MaCV: 'CV03', TenCV: 'Trưởng phòng', LuongCoBan: 25000000 },
             { MaCV: 'CV04', TenCV: 'Kế toán', LuongCoBan: 15000000 },
-            { MaCV: 'CV05', TenCV: 'Nhân viên', LuongCoBan: 10000000 },
-            { MaCV: 'CV06', TenCV: 'Trưởng phòng IT', LuongCoBan: 25000000 }, // Mới thêm
-            { MaCV: 'CV07', TenCV: 'Chuyên viên Pháp chế', LuongCoBan: 18000000 } // Mới thêm
+            { MaCV: 'CV05', TenCV: 'Nhân viên', LuongCoBan: 10000000 }
         ],
         'nhan-vien': [
-            { MaNV: 'NV01', TenNV: 'Nguyễn Văn An', GioiTinh: 'Nam', CCCD: '001085001234', MaCV: 'CV01', MaDN: 'DN01' },
-            { MaNV: 'NV02', TenNV: 'Lê Thị Bình', GioiTinh: 'Nữ', CCCD: '001092005678', MaCV: 'CV04', MaDN: 'DN01' },
-            { MaNV: 'NV10', TenNV: 'Lý Quốc Việt', GioiTinh: 'Nam', CCCD: '001095009988', MaCV: 'CV05', MaDN: 'DN01' },
-            { MaNV: 'NV11', TenNV: 'Trần Minh Hoàng', GioiTinh: 'Nam', CCCD: '001090001234', MaCV: 'CV06', MaDN: 'DN04' }, // Mới thêm
-            { MaNV: 'NV12', TenNV: 'Hoàng Thu Trang', GioiTinh: 'Nữ', CCCD: '001095005678', MaCV: 'CV07', MaDN: 'DN04' } // Mới thêm
+            { MaNV: 'NV01', TenNV: 'Nguyễn Văn An', NgaySinh: '1985-01-15', GioiTinh: 'Nam', CCCD: '001085001234', MaCV: 'CV01', MaDN: 'DN01' },
+            { MaNV: 'NV02', TenNV: 'Lê Thị Bình', NgaySinh: '1992-05-20', GioiTinh: 'Nữ', CCCD: '001092005678', MaCV: 'CV04', MaDN: 'DN01' },
+            { MaNV: 'NV03', TenNV: 'Trần Văn Cường', NgaySinh: '1988-11-10', GioiTinh: 'Nam', CCCD: '001088002468', MaCV: 'CV05', MaDN: 'DN01' },
+            { MaNV: 'NV04', TenNV: 'Phạm Minh Đức', NgaySinh: '1990-03-25', GioiTinh: 'Nam', CCCD: '001090001357', MaCV: 'CV02', MaDN: 'DN02' },
+            { MaNV: 'NV05', TenNV: 'Đỗ Thị Em', NgaySinh: '1995-07-12', GioiTinh: 'Nữ', CCCD: '001095009876', MaCV: 'CV04', MaDN: 'DN02' },
+            { MaNV: 'NV06', TenNV: 'Hoàng Văn Phúc', NgaySinh: '1983-12-30', GioiTinh: 'Nam', CCCD: '001083004321', MaCV: 'CV05', MaDN: 'DN02' },
+            { MaNV: 'NV07', TenNV: 'Bùi Thị Gia', NgaySinh: '1991-09-05', GioiTinh: 'Nữ', CCCD: '001091001122', MaCV: 'CV03', MaDN: 'DN03' },
+            { MaNV: 'NV08', TenNV: 'Vũ Văn Huy', NgaySinh: '1987-06-18', GioiTinh: 'Nam', CCCD: '001087003344', MaCV: 'CV05', MaDN: 'DN03' },
+            { MaNV: 'NV09', TenNV: 'Đặng Thị Kim', NgaySinh: '1994-02-22', GioiTinh: 'Nữ', CCCD: '001094005566', MaCV: 'CV05', MaDN: 'DN03' },
+            { MaNV: 'NV10', TenNV: 'Lý Quốc Việt', NgaySinh: '1989-10-08', GioiTinh: 'Nam', CCCD: '001089007788', MaCV: 'CV05', MaDN: 'DN01' }
         ],
-        'qua-trinh-dong': [
-            { MaQT: 'QT-NV01-0426', MaNV: 'NV01', Thang: 4, Nam: 2026, MucLuongDong: 50000000, SoTienDong: 16000000, TrangThaiDong: 'Đã đóng', MaSo: 'SO01' },
-            { MaQT: 'QT-NV11-0526', MaNV: 'NV11', Thang: 5, Nam: 2026, MucLuongDong: 28000000, SoTienDong: 8960000, TrangThaiDong: 'Chưa đóng', MaSo: 'SO11' }, // Mới thêm
-            { MaQT: 'QT-NV12-0526', MaNV: 'NV12', Thang: 5, Nam: 2026, MucLuongDong: 19500000, SoTienDong: 6240000, TrangThaiDong: 'Chưa đóng', MaSo: 'SO12' }  // Mới thêm
-        ],
-        'huong-che-do': [
-            { MaHuong: 'HCD01', MaNV: 'NV02', MaCheDo: 'CD02', NgayBatDau: '2026-04-01', NgayKetThuc: '2026-10-01', SoTienHuong: 60000000 },
-            { MaHuong: 'HCD03', MaNV: 'NV11', MaCheDo: 'CD01', NgayBatDau: '2026-05-10', NgayKetThuc: '2026-05-12', SoTienHuong: 500000 } // Mới thêm
+        'so-bhxh': [
+            { MaSo: 'SO01', NgayCap: '2010-01-01', NoiCap: 'BHXH TP.HCM', TrangThai: 'Đang hoạt động', MaNV: 'NV01' },
+            { MaSo: 'SO02', NgayCap: '2015-06-01', NoiCap: 'BHXH TP.HCM', TrangThai: 'Đang hoạt động', MaNV: 'NV02' },
+            { MaSo: 'SO10', NgayCap: '2012-03-15', NoiCap: 'BHXH TP.HCM', TrangThai: 'Đang hoạt động', MaNV: 'NV10' }
         ],
         'che-do': [
             { MaCheDo: 'CD01', TenCheDo: 'Ốm đau', MoTa: 'Hưởng khi có xác nhận của bệnh viện' },
             { MaCheDo: 'CD02', TenCheDo: 'Thai sản', MoTa: 'Hưởng 6 tháng nghỉ thai sản' },
-            { MaCheDo: 'CD03', TenCheDo: 'Hưu trí', MoTa: 'Hưởng sau khi đủ tuổi lao động' }
+            { MaCheDo: 'CD03', TenCheDo: 'Hưu trí', MoTa: 'Hưởng sau khi đủ tuổi lao động' },
+            { MaCheDo: 'CD04', TenCheDo: 'Tử tuất', MoTa: 'Hưởng cho thân nhân' },
+            { MaCheDo: 'CD05', TenCheDo: 'Tai nạn lao động', MoTa: 'Hưởng khi bị tai nạn hoặc bệnh nghề nghiệp' }
+        ],
+        'qua-trinh-dong': [
+            { MaQT: 'QT-NV01-0426', MaNV: 'NV01', Thang: 4, Nam: 2026, MucLuongDong: 60000000, SoTienDong: 14976000, TrangThaiDong: 'Đã đóng', MaSo: 'SO01' },
+            { MaQT: 'QT-NV02-0426', MaNV: 'NV02', Thang: 4, Nam: 2026, MucLuongDong: 17000000, SoTienDong: 5440000, TrangThaiDong: 'Đã đóng', MaSo: 'SO02' },
+            { MaQT: 'QT-NV10-0426', MaNV: 'NV10', Thang: 4, Nam: 2026, MucLuongDong: 11000000, SoTienDong: 3520000, TrangThaiDong: 'Đã đóng', MaSo: 'SO10' }
+        ],
+        'huong-che-do': [
+            { MaHuong: 'HCD01', MaNV: 'NV02', MaCheDo: 'CD02', NgayBatDau: '2026-04-01', NgayKetThuc: '2026-10-01', SoTienHuong: 60000000 },
+            { MaHuong: 'HCD02', MaNV: 'NV03', MaCheDo: 'CD01', NgayBatDau: '2026-04-05', NgayKetThuc: '2026-04-10', SoTienHuong: 2000000 }
+        ],
+        'luong-nv': [
+            { MaLuong: 'L-NV01-0426', Thang: 4, Nam: 2026, TongLuong: 60000000, Thuong: 10000000, MaNV: 'NV01' },
+            { MaLuong: 'L-NV02-0426', Thang: 4, Nam: 2026, TongLuong: 17000000, Thuong: 2000000, MaNV: 'NV02' }
+        ],
+        'hoa-don': [
+            { MaHoaDon: 'HD-DN01-0426', Thang: 4, Nam: 2026, TongTien: 23936000, MaDN: 'DN01' }
         ]
     };
 

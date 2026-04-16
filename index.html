@@ -459,44 +459,29 @@
 
     // --- 1. HÀM CHUYỂN TAB (LOAD TAB DỮ LIỆU) ---
     // Hàm chính để thay đổi quản lý giữa các thực thể BHXH
-    async function loadTab(endpoint, pk, query = '') {
+  async function loadTab(endpoint, pk, query = '') {
         activeTable = endpoint; activePK = pk;
         
-        // Reset ô tìm kiếm nếu không phải đang tìm
         if(!query) document.getElementById('search-input').value = '';
         
-        // Cập nhật trạng thái menu bên trái (active class)
+        // Cập nhật giao diện menu
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        // Nếu sự kiện kích hoạt bằng cách click (có event), thêm active cho mục đó
-        if (event && event.currentTarget) {
+        if (event && event.currentTarget && event.currentTarget.classList.contains('nav-item')) {
             event.currentTarget.classList.add('active');
-            // Cập nhật tiêu đề trang chính
             document.getElementById('current-title').innerText = 'Quản lý ' + tableConfigs[activeTable].title;
         }
 
-        // --- Khối xử lý dữ liệu (Kết nối Backend hoặc dùng Mock) ---
-        // Trong thực tế, bạn sẽ dùng đoạn code này:
-        /*
+        // --- LẤY DỮ LIỆU THẬT TỪ BACKEND ---
         const url = query ? `${API_URL}/${endpoint}?q=${query}` : `${API_URL}/${endpoint}`; 
         try {
             const res = await fetch(url);
             const data = await res.json();
             renderTable(data);
         } catch (e) { 
-            document.getElementById('tbl-body').innerHTML = '<tr><td colspan="100" class="text-danger text-center py-4">Không thể kết nối Backend API!</td></tr>'; 
+            console.error(e);
+            document.getElementById('tbl-body').innerHTML = '<tr><td colspan="100" class="text-danger text-center py-4">Lỗi: Không thể kết nối Backend (Hãy chạy Node.js)!</td></tr>'; 
         }
-        */
-        
-        // Đoạn code demo dùng dữ liệu mẫu (mockData):
-        const data = mockData[endpoint] || [];
-        // Nếu có tìm kiếm, lọc dữ liệu mẫu
-        const filteredData = query ? 
-            data.filter(row => Object.values(row).some(val => String(val).toLowerCase().includes(query.toLowerCase()))) : 
-            data;
-            
-        renderTable(filteredData);
     }
-
     // --- 2. HÀM HIỂN THỊ BẢNG DỮ LIỆU (RENDER TABLE) ---
     // Tự động sinh tiêu đề cột và nội dung hàng dựa trên dữ liệu và cấu hình
     function renderTable(data) {
@@ -560,25 +545,25 @@
     }
 
     // --- 5. HÀM MỞ MODAL SỬA DỮ LIỆU ---
-    async function openEditModal(id) {
+ async function openEditModal(id) {
         isEditMode = true; editId = id;
         document.getElementById('modal-title').innerText = "Sửa " + tableConfigs[activeTable].title;
         
-        // --- Khối lấy dữ liệu chi tiết bản ghi (Backend hoặc Mock) ---
-        // Trong thực tế:
-        // const res = await fetch(`${API_URL}/${activeTable}/${id}`);
-        // const item = await res.json();
-        
-        // Đoạn code demo:
-        const data = mockData[activeTable] || [];
-        const item = data.find(x => String(x[activePK]) === String(id));
-        
-        if (!item) { alert("Không tìm thấy bản ghi!"); return; }
-        
-        renderForm(item); // Render form với dữ liệu hiện có
-        new bootstrap.Modal(document.getElementById('dataModal')).show();
+        try {
+            // Lấy 1 bản ghi cụ thể theo ID từ Database
+            const res = await fetch(`${API_URL}/${activeTable}/${id}`);
+            const item = await res.json();
+            
+            // Nếu API trả về mảng, lấy phần tử đầu tiên
+            const dataObj = Array.isArray(item) ? item[0] : item;
+            
+            if (!dataObj) { alert("Không tìm thấy dữ liệu!"); return; }
+            renderForm(dataObj);
+            new bootstrap.Modal(document.getElementById('dataModal')).show();
+        } catch (e) {
+            alert("Lỗi khi tải dữ liệu chi tiết!");
+        }
     }
-
     // --- 6. HÀM SINH TỰ ĐỘNG FORM NHẬP LIỆU ---
     // Dựa vào tableConfigs.fields để sinh các ô input tương ứng
     function renderForm(item) {
@@ -599,16 +584,11 @@
     }
 
     // --- 7. HÀM LƯU DỮ LIỆU (POST/PUT) ---
-    async function saveData() {
+  async function saveData() {
         const fields = tableConfigs[activeTable].fields;
         const payload = {};
-        // Gom dữ liệu từ các ô input
         fields.forEach(f => payload[f] = document.getElementById(`form-${f}`).value);
         
-        console.log("Dữ liệu sẽ gửi đi:", payload);
-
-        // --- Khối gửi dữ liệu về Backend ---
-        /*
         const method = isEditMode ? 'PUT' : 'POST';
         const url = isEditMode ? `${API_URL}/${activeTable}/${editId}` : `${API_URL}/${activeTable}`;
         
@@ -619,39 +599,35 @@
                 body: JSON.stringify(payload) 
             });
             const result = await res.json();
-            if (res.ok) {
-                bootstrap.Modal.getInstance(document.getElementById('dataModal')).hide();
-                loadTab(activeTable, activePK); // Tải lại bảng
-                alert(isEditMode ? "Cập nhật thành công!" : "Thêm mới thành công!");
-            } else { alert("Lỗi: " + result.message); }
-        } catch (err) { alert("Lỗi kết nối!"); }
-        */
-        
-        // Demo: Chỉ đóng modal và thông báo
-        bootstrap.Modal.getInstance(document.getElementById('dataModal')).hide();
-        alert("Demo: Dữ liệu đã được gom. Cần backend API để thực hiện Lưu thực sự.");
-    }
-
-    // --- 8. HÀM XÓA BẢN GHI (DELETE) ---
-    async function deleteItem(id) {
-        if(confirm(`Bạn có chắc chắn muốn xóa bản ghi '${id}' khỏi danh mục ${tableConfigs[activeTable].title}?\nHành động này không thể hoàn tác.`)) {
             
-            // --- Khối gửi lệnh xóa về Backend ---
-            /*
+            if (res.ok) {
+                const modalEl = document.getElementById('dataModal');
+                bootstrap.Modal.getInstance(modalEl).hide();
+                loadTab(activeTable, activePK); // Tải lại bảng để cập nhật dữ liệu mới
+                alert(isEditMode ? "Đã cập nhật Database thành công!" : "Đã thêm vào Database thành công!");
+            } else { 
+                alert("Lỗi từ Server: " + result.message); 
+            }
+        } catch (err) { 
+            alert("Lỗi kết nối Backend! Hãy kiểm tra Node.js đang chạy ở port 3000."); 
+        }
+    }
+    // --- 8. HÀM XÓA BẢN GHI (DELETE) ---
+   async function deleteItem(id) {
+        if(confirm(`Xác nhận XÓA bản ghi '${id}' khỏi Database?\nHành động này không thể hoàn tác.`)) {
             try {
                 const res = await fetch(`${API_URL}/${activeTable}/${id}`, { method: 'DELETE' });
                 if (res.ok) {
-                    loadTab(activeTable, activePK); // Tải lại bảng
-                    alert("Đã xóa bản ghi thành công.");
-                } else { alert("Không thể xóa bản ghi."); }
-            } catch (err) { alert("Lỗi kết nối!"); }
-            */
-            
-            // Demo:
-            alert("Demo: Cần backend API để thực hiện lệnh XÓA thực sự.");
+                    loadTab(activeTable, activePK);
+                    alert("Đã xóa dữ liệu thành công.");
+                } else { 
+                    alert("Lỗi: Server không cho phép xóa bản ghi này (có thể do ràng buộc dữ liệu)."); 
+                }
+            } catch (err) { 
+                alert("Lỗi kết nối!"); 
+            }
         }
     }
-
     // --- KHỞI TẠO KHI TẢI TRANG ---
     // Mặc định tải tab Doanh nghiệp
     window.onload = () => loadTab('doanh-nghiep', 'MaDN');

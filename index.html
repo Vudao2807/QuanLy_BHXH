@@ -399,28 +399,41 @@
 
     // --- DỮ LIỆU MẪU (DÙNG ĐỂ DEMO GIAO DIỆN) ---
     // Dữ liệu này được lấy trực tiếp từ các câu lệnh INSERT trong file SQL của bạn
-    const mockData = {
+   const mockData = {
         'doanh-nghiep': [
             { MaDN: 'DN01', TenDN: 'Công ty Công nghệ Việt', DiaChi: 'Quận 1, TP.HCM', SDT: '0281234567' },
             { MaDN: 'DN02', TenDN: 'Tập đoàn Xây dựng Nam', DiaChi: 'Quận Cầu Giấy, Hà Nội', SDT: '0249876543' },
-            { MaDN: 'DN03', TenDN: 'Cửa hàng Bán lẻ Minh', DiaChi: 'Quận Hải Châu, Đà Nẵng', SDT: '0236112233' }
+            { MaDN: 'DN03', TenDN: 'Cửa hàng Bán lẻ Minh', DiaChi: 'Quận Hải Châu, Đà Nẵng', SDT: '0236112233' },
+            { MaDN: 'DN04', TenDN: 'Tổng Công ty Xây dựng số 4', DiaChi: 'Hà Đông, Hà Nội', SDT: '02433556677' } // Mới thêm
         ],
         'chuc-vu': [
             { MaCV: 'CV01', TenCV: 'Giám đốc', LuongCoBan: 50000000 },
             { MaCV: 'CV04', TenCV: 'Kế toán', LuongCoBan: 15000000 },
-            { MaCV: 'CV05', TenCV: 'Nhân viên', LuongCoBan: 10000000 }
+            { MaCV: 'CV05', TenCV: 'Nhân viên', LuongCoBan: 10000000 },
+            { MaCV: 'CV06', TenCV: 'Trưởng phòng IT', LuongCoBan: 25000000 }, // Mới thêm
+            { MaCV: 'CV07', TenCV: 'Chuyên viên Pháp chế', LuongCoBan: 18000000 } // Mới thêm
+        ],
+        'nhan-vien': [
+            { MaNV: 'NV01', TenNV: 'Nguyễn Văn An', GioiTinh: 'Nam', CCCD: '001085001234', MaCV: 'CV01', MaDN: 'DN01' },
+            { MaNV: 'NV02', TenNV: 'Lê Thị Bình', GioiTinh: 'Nữ', CCCD: '001092005678', MaCV: 'CV04', MaDN: 'DN01' },
+            { MaNV: 'NV10', TenNV: 'Lý Quốc Việt', GioiTinh: 'Nam', CCCD: '001095009988', MaCV: 'CV05', MaDN: 'DN01' },
+            { MaNV: 'NV11', TenNV: 'Trần Minh Hoàng', GioiTinh: 'Nam', CCCD: '001090001234', MaCV: 'CV06', MaDN: 'DN04' }, // Mới thêm
+            { MaNV: 'NV12', TenNV: 'Hoàng Thu Trang', GioiTinh: 'Nữ', CCCD: '001095005678', MaCV: 'CV07', MaDN: 'DN04' } // Mới thêm
+        ],
+        'qua-trinh-dong': [
+            { MaQT: 'QT-NV01-0426', MaNV: 'NV01', Thang: 4, Nam: 2026, MucLuongDong: 50000000, SoTienDong: 16000000, TrangThaiDong: 'Đã đóng', MaSo: 'SO01' },
+            { MaQT: 'QT-NV11-0526', MaNV: 'NV11', Thang: 5, Nam: 2026, MucLuongDong: 28000000, SoTienDong: 8960000, TrangThaiDong: 'Chưa đóng', MaSo: 'SO11' }, // Mới thêm
+            { MaQT: 'QT-NV12-0526', MaNV: 'NV12', Thang: 5, Nam: 2026, MucLuongDong: 19500000, SoTienDong: 6240000, TrangThaiDong: 'Chưa đóng', MaSo: 'SO12' }  // Mới thêm
+        ],
+        'huong-che-do': [
+            { MaHuong: 'HCD01', MaNV: 'NV02', MaCheDo: 'CD02', NgayBatDau: '2026-04-01', NgayKetThuc: '2026-10-01', SoTienHuong: 60000000 },
+            { MaHuong: 'HCD03', MaNV: 'NV11', MaCheDo: 'CD01', NgayBatDau: '2026-05-10', NgayKetThuc: '2026-05-12', SoTienHuong: 500000 } // Mới thêm
         ],
         'che-do': [
             { MaCheDo: 'CD01', TenCheDo: 'Ốm đau', MoTa: 'Hưởng khi có xác nhận của bệnh viện' },
             { MaCheDo: 'CD02', TenCheDo: 'Thai sản', MoTa: 'Hưởng 6 tháng nghỉ thai sản' },
             { MaCheDo: 'CD03', TenCheDo: 'Hưu trí', MoTa: 'Hưởng sau khi đủ tuổi lao động' }
-        ],
-        'nhan-vien': [
-            { MaNV: 'NV01', TenNV: 'Nguyễn Văn An', GioiTinh: 'Nam', CCCD: '001085001234', MaCV: 'CV01', MaDN: 'DN01' },
-            { MaNV: 'NV02', TenNV: 'Lê Thị Bình', GioiTinh: 'Nữ', CCCD: '001092005678', MaCV: 'CV04', MaDN: 'DN01' },
-            { MaNV: 'NV04', TenNV: 'Phạm Minh Đức', GioiTinh: 'Nam', CCCD: '001088009988', MaCV: 'CV02', MaDN: 'DN02' }
         ]
-        // Các bảng khác có thể thêm dữ liệu mẫu tương tự
     };
 
     // --- 1. HÀM CHUYỂN TAB (LOAD TAB DỮ LIỆU) ---

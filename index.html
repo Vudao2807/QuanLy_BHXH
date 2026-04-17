@@ -116,12 +116,69 @@
 
     let mockData = {
         'doanh-nghiep': [
-            { MaDN: 'DN01', TenDN: 'Công ty Công nghệ Việt', DiaChi: 'Quận 1, TP.HCM', SDT: '0281234567' },
-            { MaDN: 'DN02', TenDN: 'Tập đoàn Xây dựng Nam', DiaChi: 'Quận Cầu Giấy, Hà Nội', SDT: '0249876543' }
-        ],
-        'chuc-vu': [{ MaCV: 'CV01', TenCV: 'Giám đốc', LuongCoBan: 50000000 }],
-        'nhan-vien': [{ MaNV: 'NV01', TenNV: 'Nguyễn Văn An', NgaySinh: '1985-05-20', GioiTinh: 'Nam', CCCD: '001085001234', DiaChi: 'Quận 1, HCM', SDT: '0901', MaCV: 'CV01', MaDN: 'DN01' }],
-        'qua-trinh-dong': [], 'hop-dong': [], 'so-bhxh': [], 'luong-nv': [], 'hoa-don': [], 'che-do': []
+        { MaDN: 'DN01', TenDN: 'Công ty Công nghệ Việt', DiaChi: 'Quận 1, TP.HCM', SDT: '0281234567' },
+        { MaDN: 'DN02', TenDN: 'Tập đoàn Xây dựng Nam', DiaChi: 'Quận Cầu Giấy, Hà Nội', SDT: '0249876543' },
+        { MaDN: 'DN03', TenDN: 'Cửa hàng Bán lẻ Minh', DiaChi: 'Quận Hải Châu, Đà Nẵng', SDT: '0236112233' }
+    ],
+    'chuc-vu': [
+        { MaCV: 'CV01', TenCV: 'Giám đốc', LuongCoBan: 50000000 },
+        { MaCV: 'CV02', TenCV: 'Phó Giám đốc', LuongCoBan: 35000000 },
+        { MaCV: 'CV03', TenCV: 'Quản lý', LuongCoBan: 20000000 },
+        { MaCV: 'CV04', TenCV: 'Kế toán', LuongCoBan: 15000000 },
+        { MaCV: 'CV05', TenCV: 'Nhân viên', LuongCoBan: 10000000 }
+    ],
+    'che-do': [
+        { MaCheDo: 'CD01', TenCheDo: 'Ốm đau', MoTa: 'Hưởng khi có xác nhận của bệnh viện' },
+        { MaCheDo: 'CD02', TenCheDo: 'Thai sản', MoTa: 'Hưởng 6 tháng nghỉ thai sản' },
+        { MaCheDo: 'CD03', TenCheDo: 'Hưu trí', MoTa: 'Hưởng sau khi đủ tuổi lao động' },
+        { MaCheDo: 'CD04', TenCheDo: 'Tử tuất', MoTa: 'Hưởng cho thân nhân' },
+        { MaCheDo: 'CD05', TenCheDo: 'Tai nạn lao động', MoTa: 'Hưởng khi bị tai nạn hoặc bệnh nghề nghiệp' }
+    ],
+    'nhan-vien': [
+        { MaNV: 'NV01', TenNV: 'Nguyễn Văn An', NgaySinh: '1985-05-20', GioiTinh: 'Nam', CCCD: '001085001234', DiaChi: 'Quận 1, HCM', SDT: '0901', MaCV: 'CV01', MaDN: 'DN01' },
+        { MaNV: 'NV02', TenNV: 'Lê Thị Bình', NgaySinh: '1992-10-15', GioiTinh: 'Nữ', CCCD: '001092005678', DiaChi: 'Quận 3, HCM', SDT: '0902', MaCV: 'CV04', MaDN: 'DN01' },
+        { MaNV: 'NV03', TenNV: 'Trần Văn Cường', NgaySinh: '1990-01-10', GioiTinh: 'Nam', CCCD: '001090004321', DiaChi: 'Quận Bình Thạnh, HCM', SDT: '0903', MaCV: 'CV05', MaDN: 'DN01' },
+        { MaNV: 'NV04', TenNV: 'Phạm Minh Đức', NgaySinh: '1988-12-30', GioiTinh: 'Nam', CCCD: '001088009988', DiaChi: 'Quận Cầu Giấy, Hà Nội', SDT: '0904', MaCV: 'CV02', MaDN: 'DN02' },
+        { MaNV: 'NV05', TenNV: 'Hoàng Thu Thủy', NgaySinh: '1995-07-22', GioiTinh: 'Nữ', CCCD: '001095007766', DiaChi: 'Quận Thanh Xuân, Hà Nội', SDT: '0905', MaCV: 'CV04', MaDN: 'DN02' },
+        { MaNV: 'NV06', TenNV: 'Vũ Hoàng Nam', NgaySinh: '1993-03-14', GioiTinh: 'Nam', CCCD: '001093005544', DiaChi: 'Quận Nam Từ Liêm, Hà Nội', SDT: '0906', MaCV: 'CV05', MaDN: 'DN02' },
+        { MaNV: 'NV07', TenNV: 'Đỗ Kim Liên', NgaySinh: '1991-09-05', GioiTinh: 'Nữ', CCCD: '001091003322', DiaChi: 'Quận Hải Châu, Đà Nẵng', SDT: '0907', MaCV: 'CV03', MaDN: 'DN03' },
+        { MaNV: 'NV08', TenNV: 'Bùi Quang Vinh', NgaySinh: '1987-11-11', GioiTinh: 'Nam', CCCD: '001087001111', DiaChi: 'Quận Sơn Trà, Đà Nẵng', SDT: '0908', MaCV: 'CV05', MaDN: 'DN03' },
+        { MaNV: 'NV09', TenNV: 'Đặng Phương Mai', NgaySinh: '1994-06-18', GioiTinh: 'Nữ', CCCD: '001094002233', DiaChi: 'Quận Liên Chiểu, Đà Nẵng', SDT: '0909', MaCV: 'CV05', MaDN: 'DN03' },
+        { MaNV: 'NV10', TenNV: 'Lý Quốc Việt', NgaySinh: '1990-02-28', GioiTinh: 'Nam', CCCD: '001090004455', DiaChi: 'Quận 1, HCM', SDT: '0910', MaCV: 'CV05', MaDN: 'DN01' }
+    ],
+    'hop-dong': [
+        { MaHD: 'HD01', NgayBatDau: '2024-01-01', NgayKetThuc: '2026-01-01', MaNV: 'NV01' },
+        { MaHD: 'HD02', NgayBatDau: '2024-01-01', NgayKetThuc: '2025-01-01', MaNV: 'NV02' },
+        { MaHD: 'HD03', NgayBatDau: '2024-02-15', NgayKetThuc: '2025-02-15', MaNV: 'NV03' },
+        { MaHD: 'HD04', NgayBatDau: '2024-01-01', NgayKetThuc: '2027-01-01', MaNV: 'NV04' },
+        { MaHD: 'HD05', NgayBatDau: '2024-03-01', NgayKetThuc: '2025-03-01', MaNV: 'NV05' }
+    ],
+    'so-bhxh': [
+        { MaSo: 'BH01', NgayCap: '2024-01-10', NoiCap: 'TP.HCM', TrangThai: 'Đang hoạt động', MaNV: 'NV01' },
+        { MaSo: 'BH02', NgayCap: '2024-01-10', NoiCap: 'TP.HCM', TrangThai: 'Đang hoạt động', MaNV: 'NV02' },
+        { MaSo: 'BH03', NgayCap: '2024-02-20', NoiCap: 'TP.HCM', TrangThai: 'Đang hoạt động', MaNV: 'NV03' },
+        { MaSo: 'BH04', NgayCap: '2024-01-15', NoiCap: 'Hà Nội', TrangThai: 'Đang hoạt động', MaNV: 'NV04' },
+        { MaSo: 'BH05', NgayCap: '2024-03-05', NoiCap: 'Hà Nội', TrangThai: 'Đang hoạt động', MaNV: 'NV05' }
+    ],
+    'luong-nv': [
+        { MaLuong: 'L01-0426', Thang: 4, Nam: 2026, TongLuong: 50000000, Thuong: 5000000, MaNV: 'NV01' },
+        { MaLuong: 'L02-0426', Thang: 4, Nam: 2026, TongLuong: 15000000, Thuong: 1000000, MaNV: 'NV02' },
+        { MaLuong: 'L03-0426', Thang: 4, Nam: 2026, TongLuong: 10000000, Thuong: 500000, MaNV: 'NV03' },
+        { MaLuong: 'L04-0426', Thang: 4, Nam: 2026, TongLuong: 35000000, Thuong: 3000000, MaNV: 'NV04' },
+        { MaLuong: 'L05-0426', Thang: 4, Nam: 2026, TongLuong: 15000000, Thuong: 1000000, MaNV: 'NV05' }
+    ],
+    'qua-trinh-dong': [
+        { MaQT: 'QT-NV01-0426', Thang: 4, Nam: 2026, MucLuongDong: 50000000, SoTienDong: 16000000, TrangThaiDong: 'Đã đóng', MaSo: 'BH01' },
+        { MaQT: 'QT-NV02-0426', Thang: 4, Nam: 2026, MucLuongDong: 15000000, SoTienDong: 4800000, TrangThaiDong: 'Đã đóng', MaSo: 'BH02' },
+        { MaQT: 'QT-NV03-0426', Thang: 4, Nam: 2026, MucLuongDong: 10000000, SoTienDong: 3200000, TrangThaiDong: 'Đã đóng', MaSo: 'BH03' }
+    ],
+    'hoa-don': [
+        { MaHoaDon: 'HD-DN01-0426', Thang: 4, Nam: 2026, MaDN: 'DN01', TongTien: 24000000 },
+        { MaHoaDon: 'HD-DN02-0426', Thang: 4, Nam: 2026, MaDN: 'DN02', TongTien: 16000000 }
+    ],
+    'huong-che-do': [
+        { MaHuong: 'HCD01', MaNV: 'NV02', MaCheDo: 'CD02', NgayBatDau: '2026-05-01', NgayKetThuc: '2026-11-01', SoTienHuong: 90000000 }
+    ]
     };
 
     async function loadTab(endpoint, pk, query = '') {
@@ -199,11 +256,52 @@
     }
 
     function deleteItem(id) {
-        if(confirm("Xác nhận xóa?")) {
+    if (confirm(`CẢNH BÁO: Xóa doanh nghiệp này sẽ xóa TẤT CẢ nhân viên, hợp đồng và dữ liệu liên quan. Bạn có chắc chắn?`)) {
+        
+        if (activeTable === 'doanh-nghiep') {
+            // 1. Tìm danh sách mã nhân viên thuộc doanh nghiệp này
+            const nhanVienIds = mockData['nhan-vien']
+                .filter(nv => nv.MaDN === id)
+                .map(nv => nv.MaNV);
+
+            // 2. Tìm danh sách mã sổ BHXH và hợp đồng của các nhân viên đó
+            const soBHXHIds = mockData['so-bhxh']
+                .filter(s => nhanVienIds.includes(s.MaNV))
+                .map(s => s.MaSo);
+            
+            const hopDongIds = mockData['hop-dong']
+                .filter(hd => nhanVienIds.includes(hd.MaNV))
+                .map(hd => hd.MaHD);
+
+            // 3. Tiến hành xóa theo tầng (Filter)
+            // Xóa quá trình đóng (liên quan sổ hoặc hợp đồng)
+            mockData['qua-trinh-dong'] = mockData['qua-trinh-dong'].filter(qt => 
+                !soBHXHIds.includes(qt.MaSo) && !hopDongIds.includes(qt.MaHD)
+            );
+
+            // Xóa Sổ, Hợp đồng, Lương, Hưởng chế độ (liên quan nhân viên)
+            mockData['so-bhxh'] = mockData['so-bhxh'].filter(s => !nhanVienIds.includes(s.MaNV));
+            mockData['hop-dong'] = mockData['hop-dong'].filter(hd => !nhanVienIds.includes(hd.MaNV));
+            mockData['luong-nv'] = mockData['luong-nv'].filter(l => !nhanVienIds.includes(l.MaNV));
+            mockData['huong-che-do'] = mockData['huong-che-do'].filter(hcd => !nhanVienIds.includes(hcd.MaNV));
+
+            // Xóa Hóa đơn và Nhân viên (liên quan trực tiếp doanh nghiệp)
+            mockData['hoa-don'] = mockData['hoa-don'].filter(hdn => hdn.MaDN !== id);
+            mockData['nhan-vien'] = mockData['nhan-vien'].filter(nv => nv.MaDN !== id);
+            
+            // Cuối cùng xóa chính doanh nghiệp
+            mockData['doanh-nghiep'] = mockData['doanh-nghiep'].filter(dn => dn.MaDN !== id);
+
+        } else {
+            // Logic xóa thông thường cho các bảng khác
             mockData[activeTable] = mockData[activeTable].filter(x => String(x[activePK]) !== String(id));
-            loadTab(activeTable, activePK);
         }
+
+        // Tải lại bảng hiện tại để cập nhật giao diện
+        loadTab(activeTable, activePK);
+        alert("Đã xóa sạch các dữ liệu liên quan!");
     }
+}
 
     window.onload = () => loadTab('doanh-nghiep', 'MaDN');
 </script>

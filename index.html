@@ -242,19 +242,84 @@
     }
 
     function saveData() {
-        const payload = {};
-        tableConfigs[activeTable].fields.forEach(f => payload[f] = document.getElementById(`form-${f}`).value);
-        if (isEditMode) {
-            const idx = mockData[activeTable].findIndex(x => String(x[activePK]) === String(editId));
-            if(idx !== -1) mockData[activeTable][idx] = payload;
-        } else {
-            mockData[activeTable].push(payload);
+    const payload = {};
+    // Thu thập dữ liệu từ các input form
+    tableConfigs[activeTable].fields.forEach(f => {
+        payload[f] = document.getElementById(`form-${f}`).value;
+    });
+
+    if (isEditMode) {
+        // Cập nhật bản ghi hiện có
+        const idx = mockData[activeTable].findIndex(x => String(x[activePK]) === String(editId));
+        if (idx !== -1) mockData[activeTable][idx] = payload;
+    } else {
+        // Thêm bản ghi mới
+        mockData[activeTable].push(payload);
+
+        // LOGIC TỰ ĐỘNG: Nếu là bảng Hợp đồng, cập nhật Quá trình đóng và Hóa đơn
+        if (activeTable === 'hop-dong') {
+            autoUpdateProcessAndInvoice(payload);
         }
-        bootstrap.Modal.getInstance(document.getElementById('dataModal')).hide();
-        loadTab(activeTable, activePK);
-        alert("Thao tác thành công!");
     }
 
+    // Đóng Modal và tải lại bảng
+    bootstrap.Modal.getInstance(document.getElementById('dataModal')).hide();
+    loadTab(activeTable, activePK);
+    alert("Lưu thành công! Hệ thống đã tự động cập nhật Quá trình đóng và Hóa đơn liên quan.");
+}
+
+// --- HÀM XỬ LÝ TỰ ĐỘNG CẬP NHẬT (Quá trình đóng & Hóa đơn) ---
+function autoUpdateProcessAndInvoice(contract) {
+    const now = new Date();
+    const thang = now.getMonth() + 1; // Tháng hiện tại
+    const nam = now.getFullYear();   // Năm hiện tại
+
+    // 1. Tìm thông tin Nhân viên để biết họ thuộc Công ty (MaDN) và Chức vụ (MaCV) nào
+    const nv = mockData['nhan-vien'].find(item => item.MaNV === contract.MaNV);
+    if (!nv) return;
+
+    // 2. Tìm Lương cơ bản từ bảng Chức vụ để tính số tiền đóng
+    const cv = mockData['chuc-vu'].find(item => item.MaCV === nv.MaCV);
+    const luongCoBan = cv ? parseFloat(cv.LuongCoBan) : 0;
+    
+    // Tính số tiền đóng (32% lương cơ bản, tối đa không quá 46.800.000đ theo quy định)
+    const soTienDong = Math.round(Math.min(luongCoBan * 0.32, 46800000));
+
+    // 3. Tìm mã số sổ BHXH của nhân viên
+    const soBH = mockData['so-bhxh'].find(s => s.MaNV === contract.MaNV);
+    const maSoSo = soBH ? soBH.MaSo : `BH-${contract.MaNV}`;
+
+    // 4. TỰ ĐỘNG THÊM VÀO QUÁ TRÌNH ĐÓNG
+    const newProcess = {
+        MaQT: `QT-${contract.MaNV}-${Date.now()}`, // Tạo mã duy nhất
+        Thang: thang,
+        Nam: nam,
+        MucLuongDong: luongCoBan,
+        SoTienDong: soTienDong,
+        TrangThaiDong: 'Chưa đóng',
+        MaSo: maSoSo,
+        MaHD: contract.MaHD
+    };
+    mockData['qua-trinh-dong'].push(newProcess);
+
+    // 5. TỰ ĐỘNG CẬP NHẬT HÓA ĐƠN ĐƠN VỊ
+    const maHoaDon = `HD-${nv.MaDN}-${thang}${nam}`;
+    let hoaDon = mockData['hoa-don'].find(h => h.MaHoaDon === maHoaDon);
+
+    if (hoaDon) {
+        // Nếu đã có hóa đơn tháng này của công ty đó, cộng dồn tiền vào
+        hoaDon.TongTien = parseFloat(hoaDon.TongTien) + soTienDong;
+    } else {
+        // Nếu chưa có, tạo mới hóa đơn tháng này cho công ty
+        mockData['hoa-don'].push({
+            MaHoaDon: maHoaDon,
+            Thang: thang,
+            Nam: nam,
+            MaDN: nv.MaDN,
+            TongTien: soTienDong
+        });
+    }
+}
     function deleteItem(id) {
     if (confirm(`CẢNH BÁO: Xóa doanh nghiệp này sẽ xóa TẤT CẢ nhân viên, hợp đồng và dữ liệu liên quan. Bạn có chắc chắn?`)) {
         
